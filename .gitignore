@@ -140,3 +140,6 @@ typechain-types
 cache
 artifacts
 
+# Remix files
+.states/vm-cancun
+
