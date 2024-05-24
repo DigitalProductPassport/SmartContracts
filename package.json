@@ -4,7 +4,8 @@
   "description": "Public project for Digital Product Passport with the idea to create an EIP",
   "main": "index.js",
   "scripts": {
-    "test": "npx hardhat test"
+    "test": "npx hardhat test",
+    "prepublishOnly": "npx hardhat compile"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",

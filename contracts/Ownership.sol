@@ -3,8 +3,9 @@ pragma solidity ^0.8.20;
 
 import "./Owner.sol";
 import "./Batch.sol";
+import "./Geolocation.sol";
 
-contract Ownership is Ownable, Batch {
+contract Ownership is Ownable, Batch, Geolocation {
     mapping(address => bool) public contributors;
 
     event BatchMinted(uint256 amount, uint256 batchId);
@@ -50,5 +51,14 @@ contract Ownership is Ownable, Batch {
         string[] memory specifications
     ) public onlyContributor {
         setBatchData(batchId, uid, gtin, taricCode, manufacturerInfo, facilityInfo, consumerInfo, endOfLifeInfo, description, manuals, specifications);
+    }
+
+    function addBatchGeolocation(
+        uint256 batchId,
+        string memory latitude,
+        string memory longitude,
+        string memory additionalInfo
+    ) public onlyContributor {
+        setGeolocation(batchId, latitude, longitude, additionalInfo);
     }
 }

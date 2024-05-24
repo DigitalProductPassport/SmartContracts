@@ -128,4 +128,38 @@ describe("Ownership", function () {
       ).to.be.revertedWith("Not authorized");
     });
   });
+
+  describe("Geolocation", function () {
+    it("Should allow owner and contributors to add geolocation data", async function () {
+      const { ownership, owner, contributor } = await loadFixture(deployOwnershipFixture);
+
+      const batchId = 1;
+      const latitude = "40.7128 N";
+      const longitude = "74.0060 W";
+      const additionalInfo = "New York City";
+
+      await ownership.connect(owner).addBatchGeolocation(batchId, latitude, longitude, additionalInfo);
+      let geo = await ownership.getGeolocation(batchId);
+      expect(geo.latitude).to.equal(latitude);
+      expect(geo.longitude).to.equal(longitude);
+
+      await ownership.connect(contributor).addBatchGeolocation(batchId + 1, latitude, longitude, additionalInfo);
+      geo = await ownership.getGeolocation(batchId + 1);
+      expect(geo.latitude).to.equal(latitude);
+      expect(geo.longitude).to.equal(longitude);
+    });
+
+    it("Should prevent non-owners and non-contributors from adding geolocation data", async function () {
+      const { ownership, otherAccount } = await loadFixture(deployOwnershipFixture);
+
+      const batchId = 1;
+      const latitude = "40.7128 N";
+      const longitude = "74.0060 W";
+      const additionalInfo = "New York City";
+
+      await expect(
+        ownership.connect(otherAccount).addBatchGeolocation(batchId, latitude, longitude, additionalInfo)
+      ).to.be.revertedWith("Not authorized");
+    });
+  });
 });
