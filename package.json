@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npx hardhat test",
     "prepublishOnly": "npx hardhat compile",
-    "deploy": "npx hardhat run scripts/deploy.ts --network rinkeby"
+    "deploy": "npx hardhat run scripts/deploy.ts --network sepolia"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
