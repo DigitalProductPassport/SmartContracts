@@ -135,11 +135,12 @@ coverage
 coverage.json
 typechain
 typechain-types
+package-lock.json
 
 # Hardhat files
 cache
 artifacts
 
 # Remix files
-.states/vm-cancun
+.states
 
