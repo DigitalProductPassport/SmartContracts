@@ -1,22 +1,26 @@
+// test/geolocation.test.ts
+
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { Ownership } from "../typechain-types";
 
 describe("Geolocation", function () {
   async function deployGeolocationFixture() {
-    const [owner, contributor, otherAccount] = await ethers.getSigners();
+    await network.provider.request({ method: "hardhat_reset", params: [] }); // Ensure the Hardhat network is reset and initialized
 
-    const OwnershipFactory = await ethers.getContractFactory("Ownership");
+    const [_, wallet, contributor, otherAccount] = await ethers.getSigners();
+
+    const OwnershipFactory = await ethers.getContractFactory("Ownership", wallet);
     const ownership = (await OwnershipFactory.deploy()) as Ownership;
 
     await ownership.addContributor(contributor.address);
 
-    return { ownership, owner, contributor, otherAccount };
+    return { ownership, wallet, contributor, otherAccount };
   }
 
   describe("Geolocation Updates", function () {
     it("Should allow owner and contributors to update geolocations for multiple batches", async function () {
-      const { ownership, owner, contributor } = await deployGeolocationFixture();
+      const { ownership, wallet, contributor } = await deployGeolocationFixture();
 
       const batches = [
         { batchId: 1, amount: 100, origin: "Factory A", location: "Location A" },
@@ -30,11 +34,17 @@ describe("Geolocation", function () {
       ];
 
       for (const batch of batches) {
-        await ownership.connect(owner).mintBatch(batch.amount, batch.batchId, batch.origin, batch.location);
+        await ownership.connect(wallet).mintBatch(batch.amount, batch.batchId, batch.origin, batch.location);
+        await ownership.connect(contributor).mintBatch(batch.amount, batch.batchId, batch.origin, batch.location);
 
         for (const geo of geolocations) {
-          await ownership.connect(owner).addBatchGeolocation(batch.batchId, geo.latitude, geo.longitude, geo.info);
-          const retrievedGeo = await ownership.getGeolocation(batch.batchId);
+          await ownership.connect(wallet).addBatchGeolocation(batch.batchId, geo.latitude, geo.longitude, geo.info);
+          let retrievedGeo = await ownership.getGeolocation(batch.batchId);
+          expect(retrievedGeo.latitude).to.equal(geo.latitude);
+          expect(retrievedGeo.longitude).to.equal(geo.longitude);
+
+          await ownership.connect(contributor).addBatchGeolocation(batch.batchId, geo.latitude, geo.longitude, geo.info);
+          retrievedGeo = await ownership.getGeolocation(batch.batchId);
           expect(retrievedGeo.latitude).to.equal(geo.latitude);
           expect(retrievedGeo.longitude).to.equal(geo.longitude);
         }
@@ -55,14 +65,15 @@ describe("Geolocation", function () {
     });
 
     it("Should allow multiple geolocation updates for the same batch", async function () {
-      const { ownership, owner } = await deployGeolocationFixture();
+      const { ownership, wallet, contributor } = await deployGeolocationFixture();
 
       const batchId = 1;
       const amount = 100;
       const origin = "Factory A";
       const location = "Location A";
 
-      await ownership.connect(owner).mintBatch(amount, batchId, origin, location);
+      await ownership.connect(wallet).mintBatch(amount, batchId, origin, location);
+      await ownership.connect(contributor).mintBatch(amount, batchId, origin, location);
 
       const geolocations = [
         { latitude: "40.7128 N", longitude: "74.0060 W", info: "New York City" },
@@ -71,8 +82,13 @@ describe("Geolocation", function () {
       ];
 
       for (const geo of geolocations) {
-        await ownership.connect(owner).addBatchGeolocation(batchId, geo.latitude, geo.longitude, geo.info);
-        const retrievedGeo = await ownership.getGeolocation(batchId);
+        await ownership.connect(wallet).addBatchGeolocation(batchId, geo.latitude, geo.longitude, geo.info);
+        let retrievedGeo = await ownership.getGeolocation(batchId);
+        expect(retrievedGeo.latitude).to.equal(geo.latitude);
+        expect(retrievedGeo.longitude).to.equal(geo.longitude);
+
+        await ownership.connect(contributor).addBatchGeolocation(batchId, geo.latitude, geo.longitude, geo.info);
+        retrievedGeo = await ownership.getGeolocation(batchId);
         expect(retrievedGeo.latitude).to.equal(geo.latitude);
         expect(retrievedGeo.longitude).to.equal(geo.longitude);
       }

@@ -1,3 +1,5 @@
+// hardhat.config.ts
+
 import "@nomicfoundation/hardhat-toolbox";
 import "@typechain/hardhat";
 import { HardhatUserConfig } from "hardhat/types";
@@ -20,7 +22,7 @@ const config: HardhatUserConfig = {
   networks: {
     sepolia: {
       url: `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-      accounts: [`0x${process.env.PRIVATE_KEY}`]
+      accounts: []
     },
   }
 };
