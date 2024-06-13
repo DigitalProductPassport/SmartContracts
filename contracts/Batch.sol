@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+import "@openzeppelin/contracts/ownership/Ownable.sol";
 
 import "./ProductPassport.sol";
 
 contract Batch is ProductPassport {
     struct BatchDetails {
         uint256 amount;
-        string origin;
-        string location;
+        uint256 assemblingTime;
+        string transportDetails;
+        string geolocation;
     }
 
     mapping(uint256 => BatchDetails) public batches;
@@ -15,27 +17,16 @@ contract Batch is ProductPassport {
     function setBatchDetails(
         uint256 batchId,
         uint256 amount,
-        string memory origin,
-        string memory location
-    ) internal {
-        batches[batchId] = BatchDetails(amount, origin, location);
-    }
-
-    function setBatchData(
-        uint256 batchId,
-        string memory uid,
-        string memory gtin,
-        string memory taricCode,
-        string memory manufacturerInfo,
-        string memory facilityInfo,
-        string memory consumerInfo,
-        string memory endOfLifeInfo,
-        string memory description,
-        string[] memory manuals,
-        string[] memory specifications
-    ) public {
-        setProductDetails(batchId, uid, gtin, taricCode, manufacturerInfo, facilityInfo, consumerInfo, endOfLifeInfo);
-        setProductData(batchId, description, manuals, specifications);
+        uint256 assemblingTime,
+        string memory transportDetails,
+        string memory geolocation
+    ) public onlyOwner {
+        batches[batchId] = BatchDetails(
+            amount,
+            assemblingTime,
+            transportDetails,
+            geolocation
+        );
     }
 
     function getBatchDetails(uint256 batchId) public view returns (BatchDetails memory) {

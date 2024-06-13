@@ -1,4 +1,4 @@
-import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -6,12 +6,20 @@ describe("Ownership", function () {
   async function deployOwnershipFixture() {
     const [owner, otherAccount, contributor] = await ethers.getSigners();
 
-    const Ownership = await ethers.getContractFactory("Ownership");
-    const ownership = await Ownership.deploy();
+    // Deploy ProductPassport contract
+    const ProductPassport = await ethers.getContractFactory("ProductPassport");
+    const productPassport = await ProductPassport.deploy();
+    await productPassport.deployed();
 
-    await ownership.addContributor(contributor.address);
+    // Deploy Batch contract (inherits ProductPassport)
+    const Batch = await ethers.getContractFactory("Batch");
+    const batch = await Batch.deploy();
+    await batch.deployed();
 
-    return { ownership, owner, otherAccount, contributor };
+    // Add contributor to the Batch contract
+    await batch.addContributor(contributor.address);
+
+    return { ownership: batch, owner, otherAccount, contributor, productPassport, batch };
   }
 
   describe("Deployment", function () {
@@ -34,97 +42,74 @@ describe("Ownership", function () {
   });
 
   describe("Batch Minting", function () {
-    it("Should allow owner and contributors to mint batches", async function () {
+    it("Should allow owner and contributors to set batch details", async function () {
       const { ownership, owner, contributor } = await loadFixture(deployOwnershipFixture);
 
       const batchId = 1;
       const amount = 100;
-      const origin = "Factory A";
-      const location = "Location A";
+      const assemblingTime = Math.floor(Date.now() / 1000);
+      const transportDetails = "Transport A";
+      const geolocation = "40.7128 N, 74.0060 W";
+
+      // Product details
       const uid = "UID123";
       const gtin = "GTIN123";
       const taricCode = "TARIC123";
       const manufacturerInfo = "Manufacturer Info";
-      const facilityInfo = "Facility Info";
+      const consumerInfo = "Consumer Info";
+      const endOfLifeInfo = "End of Life Info";
       const description = "Product Description";
       const manuals = ["Manual 1", "Manual 2"];
       const specifications = ["Spec 1", "Spec 2"];
-      const consumerInfo = "Consumer Info";
-      const endOfLifeInfo = "End of Life Info";
 
-      await ownership.connect(owner).mintBatch(amount, batchId, origin, location);
+      // Set product details and data in ProductPassport contract
+      await ownership.connect(owner).setProductDetails(batchId, uid, gtin, taricCode, manufacturerInfo, consumerInfo, endOfLifeInfo);
+      await ownership.connect(owner).setProductData(batchId, description, manuals, specifications);
 
-      await ownership.connect(owner).setBatchAndData(
-        batchId,
-        uid,
-        gtin,
-        taricCode,
-        manufacturerInfo,
-        facilityInfo,
-        consumerInfo,
-        endOfLifeInfo,
-        description,
-        manuals,
-        specifications
-      );
+      // Set batch details
+      await ownership.connect(owner).setBatchDetails(batchId, amount, assemblingTime, transportDetails, geolocation);
 
-      expect((await ownership.getBatchDetails(batchId)).amount).to.equal(amount);
+      let batchDetails = await ownership.getBatchDetails(batchId);
+      expect(batchDetails.amount).to.equal(amount);
+      expect(batchDetails.assemblingTime).to.equal(assemblingTime);
+      expect(batchDetails.transportDetails).to.equal(transportDetails);
+      expect(batchDetails.geolocation).to.equal(geolocation);
 
-      await ownership.connect(contributor).mintBatch(amount, batchId + 1, origin, location);
+      // Verify product details
+      let productDetails = await ownership.getProductDetails(batchId);
+      expect(productDetails.uid).to.equal(uid);
+      expect(productDetails.gtin).to.equal(gtin);
+      expect(productDetails.taricCode).to.equal(taricCode);
+      expect(productDetails.manufacturerInfo).to.equal(manufacturerInfo);
+      expect(productDetails.consumerInfo).to.equal(consumerInfo);
+      expect(productDetails.endOfLifeInfo).to.equal(endOfLifeInfo);
 
-      await ownership.connect(contributor).setBatchAndData(
-        batchId + 1,
-        uid,
-        gtin,
-        taricCode,
-        manufacturerInfo,
-        facilityInfo,
-        consumerInfo,
-        endOfLifeInfo,
-        description,
-        manuals,
-        specifications
-      );
+      // Verify product data
+      let productData = await ownership.getProductData(batchId);
+      expect(productData.description).to.equal(description);
+      expect(productData.manuals).to.deep.equal(manuals);
+      expect(productData.specifications).to.deep.equal(specifications);
 
-      expect((await ownership.getBatchDetails(batchId + 1)).amount).to.equal(amount);
+      await ownership.connect(contributor).setBatchDetails(batchId + 1, amount, assemblingTime, transportDetails, geolocation);
+
+      batchDetails = await ownership.getBatchDetails(batchId + 1);
+      expect(batchDetails.amount).to.equal(amount);
+      expect(batchDetails.assemblingTime).to.equal(assemblingTime);
+      expect(batchDetails.transportDetails).to.equal(transportDetails);
+      expect(batchDetails.geolocation).to.equal(geolocation);
     });
 
-    it("Should prevent non-owners and non-contributors from minting batches", async function () {
+    it("Should prevent non-owners and non-contributors from setting batch details", async function () {
       const { ownership, otherAccount } = await loadFixture(deployOwnershipFixture);
 
       const batchId = 1;
       const amount = 100;
-      const origin = "Factory A";
-      const location = "Location A";
-      const uid = "UID123";
-      const gtin = "GTIN123";
-      const taricCode = "TARIC123";
-      const manufacturerInfo = "Manufacturer Info";
-      const facilityInfo = "Facility Info";
-      const description = "Product Description";
-      const manuals = ["Manual 1", "Manual 2"];
-      const specifications = ["Spec 1", "Spec 2"];
-      const consumerInfo = "Consumer Info";
-      const endOfLifeInfo = "End of Life Info";
+      const assemblingTime = Math.floor(Date.now() / 1000);
+      const transportDetails = "Transport A";
+      const geolocation = "40.7128 N, 74.0060 W";
 
       await expect(
-        ownership.connect(otherAccount).mintBatch(amount, batchId, origin, location)
-      ).to.be.revertedWith("Not authorized");
-
-      await expect(
-        ownership.connect(otherAccount).setBatchAndData(
-          batchId,
-          uid,
-          gtin,
-          taricCode,
-          manufacturerInfo,
-          facilityInfo,
-          consumerInfo,
-          endOfLifeInfo,
-          description,
-          manuals,
-          specifications
-        )
+        ownership.connect(otherAccount).setBatchDetails(batchId, amount, assemblingTime, transportDetails, geolocation)
       ).to.be.revertedWith("Not authorized");
     });
   });
@@ -134,31 +119,31 @@ describe("Ownership", function () {
       const { ownership, owner, contributor } = await loadFixture(deployOwnershipFixture);
 
       const batchId = 1;
-      const latitude = "40.7128 N";
-      const longitude = "74.0060 W";
-      const additionalInfo = "New York City";
+      const geolocation = "40.7128 N, 74.0060 W";
+      const transportDetails = "New York City";
+      const amount = 100;
+      const assemblingTime = Math.floor(Date.now() / 1000);
 
-      await ownership.connect(owner).addBatchGeolocation(batchId, latitude, longitude, additionalInfo);
-      let geo = await ownership.getGeolocation(batchId);
-      expect(geo.latitude).to.equal(latitude);
-      expect(geo.longitude).to.equal(longitude);
+      await ownership.connect(owner).setBatchDetails(batchId, amount, assemblingTime, transportDetails, geolocation);
+      let geo = await ownership.getBatchDetails(batchId);
+      expect(geo.geolocation).to.equal(geolocation);
 
-      await ownership.connect(contributor).addBatchGeolocation(batchId + 1, latitude, longitude, additionalInfo);
-      geo = await ownership.getGeolocation(batchId + 1);
-      expect(geo.latitude).to.equal(latitude);
-      expect(geo.longitude).to.equal(longitude);
+      await ownership.connect(contributor).setBatchDetails(batchId + 1, amount, assemblingTime, transportDetails, geolocation);
+      geo = await ownership.getBatchDetails(batchId + 1);
+      expect(geo.geolocation).to.equal(geolocation);
     });
 
     it("Should prevent non-owners and non-contributors from adding geolocation data", async function () {
       const { ownership, otherAccount } = await loadFixture(deployOwnershipFixture);
 
       const batchId = 1;
-      const latitude = "40.7128 N";
-      const longitude = "74.0060 W";
-      const additionalInfo = "New York City";
+      const geolocation = "40.7128 N, 74.0060 W";
+      const transportDetails = "New York City";
+      const amount = 100;
+      const assemblingTime = Math.floor(Date.now() / 1000);
 
       await expect(
-        ownership.connect(otherAccount).addBatchGeolocation(batchId, latitude, longitude, additionalInfo)
+        ownership.connect(otherAccount).setBatchDetails(batchId, amount, assemblingTime, transportDetails, geolocation)
       ).to.be.revertedWith("Not authorized");
     });
   });
