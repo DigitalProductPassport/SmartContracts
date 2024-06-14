@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-import "@openzeppelin/contracts/ownership/Ownable.sol";
 
 import "./ProductPassport.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Batch is ProductPassport {
+contract Batch is Ownable {
     struct BatchDetails {
         uint256 amount;
         uint256 assemblingTime;
@@ -13,6 +13,11 @@ contract Batch is ProductPassport {
     }
 
     mapping(uint256 => BatchDetails) public batches;
+    ProductPassport private _productPassport;
+
+    constructor(address productPassportAddress, address initialOwner) Ownable(initialOwner) {
+        _productPassport = ProductPassport(productPassportAddress);
+    }
 
     function setBatchDetails(
         uint256 batchId,

@@ -2,34 +2,22 @@
 pragma solidity ^0.8.20;
 
 contract Geolocation {
-    struct Address {
-        string addressStreet;
-        string addressCity;
-        string addressStateProvince;
-        string addressCountry;
-        string addressCountryIso2;
-        string addressCountryIso3;
-        string addressPostalCode;
-        string addressFullAddress;
-        int256 addressLatitude;  
-        int256 addressLongitude;
-    }
-
     struct GeoLocation {
         int256 latitude;
         int256 longitude;
+        string additionalInfo;
     }
 
-    mapping(string => GeoLocation) public complexGeolocations;
+    mapping(string => GeoLocation) public geolocations;
 
-    event GeolocationAdded(string complexId, int256 latitude, int256 longitude, string additionalInfo);
+    event GeolocationAdded(string id, int256 latitude, int256 longitude, string additionalInfo);
 
-    function setGeolocation(string memory complexId, int256 latitude, int256 longitude, string memory additionalInfo) public {
-        complexGeolocations[complexId] = GeoLocation(latitude, longitude);
-        emit GeolocationAdded(complexId, latitude, longitude, additionalInfo);
+    function setGeolocation(string memory id, int256 latitude, int256 longitude, string memory additionalInfo) public {
+        geolocations[id] = GeoLocation(latitude, longitude, additionalInfo);
+        emit GeolocationAdded(id, latitude, longitude, additionalInfo);
     }
 
-    function getGeolocation(string memory complexId) public view returns (GeoLocation memory) {
-        return complexGeolocations[complexId];
+    function getGeolocation(string memory id) public view returns (GeoLocation memory) {
+        return geolocations[id];
     }
 }

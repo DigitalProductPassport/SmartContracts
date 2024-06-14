@@ -1,75 +1,95 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.0;
 
 import "./Geolocation.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ComplexManagement {
-    Geolocation public geolocationContract;
-
+contract ComplexManagement is Ownable {
     struct Complex {
         string complexId;
         string complexName;
         string complexCountry;
-        Geolocation.Address complexAddress;
+        string complexAddress;
         string complexProvidedId;
         string complexSiteType;
-        string complexSicCode;
         string complexIndustry;
+        int256 latitude;
+        int256 longitude;
     }
 
-    mapping(string => Complex) private complexes;
+    mapping(string => Complex) public complexes;
+    mapping(address => bool) public contributors;
 
-    constructor(address _geolocationContract) {
+    Geolocation public geolocationContract;
+
+    event ComplexAdded(
+        string complexId,
+        string complexName,
+        string complexCountry,
+        string complexAddress,
+        string complexProvidedId,
+        string complexSiteType,
+        string complexIndustry,
+        int256 latitude,
+        int256 longitude
+    );
+
+    constructor(address _geolocationContract, address _initialOwner) Ownable(_initialOwner) {
         geolocationContract = Geolocation(_geolocationContract);
     }
 
     function addComplex(
-        string memory complexId,
-        string memory complexName,
-        string memory complexCountry,
-        string memory addressStreet,
-        string memory addressCity,
-        string memory addressStateProvince,
-        string memory addressCountry,
-        string memory addressCountryIso2,
-        string memory addressCountryIso3,
-        string memory addressPostalCode,
-        string memory addressFullAddress,
-        int256 addressLatitude,
-        int256 addressLongitude,
-        string memory complexProvidedId,
-        string memory complexSiteType,
-        string memory complexSicCode,
-        string memory complexIndustry
-    ) public {
-        Geolocation.Address memory complexAddress = Geolocation.Address(
-            addressStreet,
-            addressCity,
-            addressStateProvince,
-            addressCountry,
-            addressCountryIso2,
-            addressCountryIso3,
-            addressPostalCode,
-            addressFullAddress,
-            addressLatitude,
-            addressLongitude
-        );
+        string memory _complexId,
+        string memory _complexName,
+        string memory _complexCountry,
+        string memory _complexAddress,
+        int256 _latitude,
+        int256 _longitude,
+        string memory _complexProvidedId,
+        string memory _complexSiteType,
+        string memory _complexIndustry
+    ) external onlyOwnerOrContributor {
+        complexes[_complexId] = Complex({
+            complexId: _complexId,
+            complexName: _complexName,
+            complexCountry: _complexCountry,
+            complexAddress: _complexAddress,
+            complexProvidedId: _complexProvidedId,
+            complexSiteType: _complexSiteType,
+            complexIndustry: _complexIndustry,
+            latitude: _latitude,
+            longitude: _longitude
+        });
 
-        Complex memory complex = Complex(
-            complexId,
-            complexName,
-            complexCountry,
-            complexAddress,
-            complexProvidedId,
-            complexSiteType,
-            complexSicCode,
-            complexIndustry
-        );
+        geolocationContract.setGeolocation(_complexId, _latitude, _longitude, _complexAddress);
 
-        complexes[complexId] = complex;
+        emit ComplexAdded(
+            _complexId,
+            _complexName,
+            _complexCountry,
+            _complexAddress,
+            _complexProvidedId,
+            _complexSiteType,
+            _complexIndustry,
+            _latitude,
+            _longitude
+        );
     }
 
-    function getComplex(string memory complexId) public view returns (Complex memory) {
-        return complexes[complexId];
+    function getComplex(string memory _complexId) public view returns (Complex memory) {
+        return complexes[_complexId];
+    }
+
+    modifier onlyOwnerOrContributor() {
+        require(owner() == _msgSender() || contributors[_msgSender()], "Ownable: caller is not the owner nor a contributor");
+        _;
+    }
+
+    function addContributor(address _contributor) external onlyOwner {
+        contributors[_contributor] = true;
+    }
+
+    function removeContributor(address _contributor) external onlyOwner {
+        contributors[_contributor] = false;
     }
 }
