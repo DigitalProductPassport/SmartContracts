@@ -8,7 +8,6 @@ describe("ComplexManagement", function () {
   let geolocation;
 
   beforeEach(async function () {
-    // Deploy Geolocation contract
     const [owner, addr1] = await ethers.getSigners();
     Geolocation = await ethers.getContractFactory("Geolocation");
     geolocation = await Geolocation.deploy();
@@ -16,7 +15,7 @@ describe("ComplexManagement", function () {
 
     // Deploy ComplexManagement contract and pass necessary arguments
     ComplexManagement = await ethers.getContractFactory("ComplexManagement");
-    complexManagement = await ComplexManagement.deploy(owner.address); // Adjust initial parameters as needed
+    complexManagement = await ComplexManagement.deploy(owner.address);
     await complexManagement.deployed();
   });
 
