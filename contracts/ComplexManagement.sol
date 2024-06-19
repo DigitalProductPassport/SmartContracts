@@ -4,38 +4,33 @@ pragma solidity ^0.8.0;
 import "./Geolocation.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ComplexManagement is Ownable {
+contract ComplexManagement is Ownable,Geolocation {
     struct Complex {
         string complexId;
         string complexName;
         string complexCountry;
         string complexAddress;
-        string complexProvidedId;
         string complexSiteType;
         string complexIndustry;
-        int256 latitude;
-        int256 longitude;
+        string latitude;
+        string longitude;
     }
 
     mapping(string => Complex) public complexes;
     mapping(address => bool) public contributors;
-
-    Geolocation public geolocationContract;
 
     event ComplexAdded(
         string complexId,
         string complexName,
         string complexCountry,
         string complexAddress,
-        string complexProvidedId,
         string complexSiteType,
         string complexIndustry,
-        int256 latitude,
-        int256 longitude
+        string latitude,
+        string longitude
     );
 
-    constructor(address _geolocationContract, address _initialOwner) Ownable(_initialOwner) {
-        geolocationContract = Geolocation(_geolocationContract);
+    constructor(address _initialOwner) Ownable(_initialOwner) {
     }
 
     function addComplex(
@@ -43,9 +38,8 @@ contract ComplexManagement is Ownable {
         string memory _complexName,
         string memory _complexCountry,
         string memory _complexAddress,
-        int256 _latitude,
-        int256 _longitude,
-        string memory _complexProvidedId,
+        string memory _latitude,
+        string memory _longitude,
         string memory _complexSiteType,
         string memory _complexIndustry
     ) external onlyOwnerOrContributor {
@@ -54,21 +48,19 @@ contract ComplexManagement is Ownable {
             complexName: _complexName,
             complexCountry: _complexCountry,
             complexAddress: _complexAddress,
-            complexProvidedId: _complexProvidedId,
             complexSiteType: _complexSiteType,
             complexIndustry: _complexIndustry,
             latitude: _latitude,
             longitude: _longitude
         });
 
-        geolocationContract.setGeolocation(_complexId, _latitude, _longitude, _complexAddress);
+        setGeolocation(_complexId, _latitude, _longitude, _complexAddress);
 
         emit ComplexAdded(
             _complexId,
             _complexName,
             _complexCountry,
             _complexAddress,
-            _complexProvidedId,
             _complexSiteType,
             _complexIndustry,
             _latitude,

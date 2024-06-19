@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.0;
 
 contract Geolocation {
     struct GeoLocation {
-        int256 latitude;
-        int256 longitude;
+        string latitude;
+        string longitude;
         string additionalInfo;
     }
 
     mapping(string => GeoLocation) public geolocations;
 
-    event GeolocationAdded(string id, int256 latitude, int256 longitude, string additionalInfo);
+    event GeolocationAdded(string id, string latitude, string longitude, string additionalInfo);
 
-    function setGeolocation(string memory id, int256 latitude, int256 longitude, string memory additionalInfo) public {
+    function setGeolocation(string memory id, string memory latitude, string memory longitude, string memory additionalInfo) public {
         geolocations[id] = GeoLocation(latitude, longitude, additionalInfo);
         emit GeolocationAdded(id, latitude, longitude, additionalInfo);
     }

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.0;
 
 import "./ProductDetails.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ProductPassport is ProductDetails {
+contract ProductPassport is ProductDetails, Ownable {
     struct ProductData {
         string description;
         string[] manuals;
@@ -12,6 +13,9 @@ contract ProductPassport is ProductDetails {
 
     mapping(uint256 => ProductData) public productData;
 
+    
+    constructor(address initialOwner) Ownable(initialOwner) {
+    }
     function setProductData(
         uint256 productId,
         string memory description,

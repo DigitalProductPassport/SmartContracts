@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.0;
 
 import "./ProductPassport.sol";
+import "./Geolocation.sol";
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Batch is Ownable {
+contract Batch is Ownable, Geolocation {
     struct BatchDetails {
         uint256 amount;
         uint256 assemblingTime;
         string transportDetails;
-        string geolocation;
     }
 
     mapping(uint256 => BatchDetails) public batches;
@@ -23,15 +24,13 @@ contract Batch is Ownable {
         uint256 batchId,
         uint256 amount,
         uint256 assemblingTime,
-        string memory transportDetails,
-        string memory geolocation
+        string memory transportDetails
     ) public onlyOwner {
         batches[batchId] = BatchDetails(
             amount,
             assemblingTime,
-            transportDetails,
-            geolocation
-        );
+            transportDetails
+            );
     }
 
     function getBatchDetails(uint256 batchId) public view returns (BatchDetails memory) {

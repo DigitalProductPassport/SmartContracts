@@ -7,8 +7,9 @@ describe("ProductPassport", function () {
   let productPassport;
 
   beforeEach(async function () {
+    const [owner, addr1] = await ethers.getSigners();
     ProductPassport = await ethers.getContractFactory("ProductPassport");
-    productPassport = await ProductPassport.deploy();
+    productPassport = await ProductPassport.deploy(owner.address);
     await productPassport.deployed();
   });
 

@@ -1,4 +1,3 @@
-// complexManagement.test.ts
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -10,13 +9,14 @@ describe("ComplexManagement", function () {
 
   beforeEach(async function () {
     // Deploy Geolocation contract
+    const [owner, addr1] = await ethers.getSigners();
     Geolocation = await ethers.getContractFactory("Geolocation");
     geolocation = await Geolocation.deploy();
     await geolocation.deployed();
 
     // Deploy ComplexManagement contract and pass necessary arguments
     ComplexManagement = await ethers.getContractFactory("ComplexManagement");
-    complexManagement = await ComplexManagement.deploy(geolocation.address, ethers.constants.AddressZero); // Adjust initial parameters as needed
+    complexManagement = await ComplexManagement.deploy(owner.address); // Adjust initial parameters as needed
     await complexManagement.deployed();
   });
 
@@ -25,9 +25,8 @@ describe("ComplexManagement", function () {
     const complexName = "Test Complex";
     const complexCountry = "Test Country";
     const complexAddress = "123 Test Street, Test City, Test Country";
-    const latitude = 407128000000000000;
-    const longitude = -74006000000000000;
-    const complexProvidedId = "PROVIDEDID1";
+    const latitude = "-79.4912";
+    const longitude = "41.108097";
     const complexSiteType = "Site Type";
     const complexIndustry = "Industry";
 
@@ -38,7 +37,6 @@ describe("ComplexManagement", function () {
       complexAddress,
       latitude,
       longitude,
-      complexProvidedId,
       complexSiteType,
       complexIndustry
     );
@@ -50,7 +48,6 @@ describe("ComplexManagement", function () {
     expect(complex.complexAddress).to.equal(complexAddress);
     expect(complex.latitude).to.equal(latitude);
     expect(complex.longitude).to.equal(longitude);
-    expect(complex.complexProvidedId).to.equal(complexProvidedId);
     expect(complex.complexSiteType).to.equal(complexSiteType);
     expect(complex.complexIndustry).to.equal(complexIndustry);
   });
