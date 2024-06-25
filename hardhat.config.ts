@@ -1,7 +1,3 @@
-// hardhat.config.ts
-
-import "@nomicfoundation/hardhat-toolbox";
-import "@typechain/hardhat";
 import { HardhatUserConfig } from "hardhat/types";
 import * as dotenv from "dotenv";
 
@@ -15,15 +11,37 @@ const config: HardhatUserConfig = {
     cache: "./cache",
     artifacts: "./artifacts"
   },
-  typechain: {
-    outDir: "typechain-types",
-    target: "ethers-v5"
-  },
   networks: {
-    sepolia: {
-      url: `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+    hardhat: {},
+    baseChain: {
+      url: `https://base-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      chainId: 1,
       accounts: []
     },
+    avalanche: {
+      url: `https://avalanche-fuji.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      chainId: 43114,
+      accounts: []
+    },
+    arbitrum: {
+      url: `https://arbitrum-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      chainId: 42161, 
+      accounts: []
+    },
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      chainId: 1337,
+      accounts: []
+    }
+  },
+  web3: {
+    blockGasLimit: 20000000,
+    gas: "auto",
+    gasPrice: "auto",
+    accounts: {
+      mnemonic: process.env.MNEMONIC || "",
+      count: 10 
+    }
   }
 };
 

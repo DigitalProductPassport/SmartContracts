@@ -1,15 +1,17 @@
-// productDetails.test.ts
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
 describe("ProductDetails", function () {
   let ProductDetails;
   let productDetails;
+  let owner;
 
   beforeEach(async function () {
+    [owner] = await ethers.getSigners();
     ProductDetails = await ethers.getContractFactory("ProductDetails");
     productDetails = await ProductDetails.deploy();
     await productDetails.deployed();
+    await productDetails.authorizeEntity(owner.address);
   });
 
   it("Should set and retrieve product details correctly", async function () {

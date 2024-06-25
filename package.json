@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npx hardhat test",
     "prepublishOnly": "npx hardhat compile",
-    "deploy": "npx hardhat run scripts/deploy.ts --network sepolia"
+    "deploySepolia": "npx hardhat run scripts/deploy.ts --network sepolia"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
@@ -14,17 +14,19 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
-    "@tableland/hardhat": "^0.0.9",
-    "@tableland/local": "^3.0.2",
     "@typechain/ethers-v5": "^10.2.1",
     "@typechain/hardhat": "^6.1.6",
     "@types/chai": "^4.2.0",
     "@types/mocha": "^10.0.6",
     "chai": "^4.3.4",
     "dotenv": "^16.4.5",
+    "ethereum-waffle": "^4.0.10",
     "ethers": "^5.7.2",
     "hardhat": "^2.22.5",
+    "hardhat-deploy": "^0.12.4",
+    "hardhat-deploy-ethers": "^0.4.2",
     "hardhat-gas-reporter": "^1.0.8",
+    "hardhat-waffle": "^0.0.1-security",
     "solidity-coverage": "^0.8.1",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
@@ -49,7 +51,6 @@
   "dependencies": {
     "@chainlink/contracts": "^1.1.1",
     "@openzeppelin/contracts": "^5.0.2",
-    "@openzeppelin/contracts-upgradeable": "^5.0.2",
-    "@tableland/evm": "^6.2.0"
+    "@openzeppelin/contracts-upgradeable": "^5.0.2"
   }
 }

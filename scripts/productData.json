@@ -1,0 +1,15 @@
+{
+    "productId": 1,
+    "description": "Brigadeiro Product Passport",
+    "manuals": ["Brigadeiro Making Instructions", "Storage Guidelines"],
+    "specifications": ["Sweetness Level: High", "Weight: 20 grams per piece"],
+    "batchNumber": "BRG-2023-001",
+    "productionDate": "2023-06-20",
+    "expiryDate": "2023-12-31",
+    "certifications": "FDA-5678",
+    "warrantyInfo": "Not applicable",
+    "materialComposition": "Condensed milk, cocoa powder, butter, chocolate sprinkles",
+    "complianceInfo": "Compliant with local food safety regulations",
+    "ipfs": "QmWDYhFAaT89spcqbKYboyCm6mkYSxKJaWUuS18Akmw96t"
+  }
+  
