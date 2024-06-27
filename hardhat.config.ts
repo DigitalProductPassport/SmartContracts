@@ -1,5 +1,6 @@
 import { HardhatUserConfig } from "hardhat/types";
 import * as dotenv from "dotenv";
+import 'solidity-docgen';
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ const config: HardhatUserConfig = {
     },
     arbitrum: {
       url: `https://arbitrum-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-      chainId: 42161, 
+      chainId: 42161,
       accounts: []
     },
     sepolia: {
@@ -34,14 +35,9 @@ const config: HardhatUserConfig = {
       accounts: []
     }
   },
-  web3: {
-    blockGasLimit: 20000000,
-    gas: "auto",
-    gasPrice: "auto",
-    accounts: {
-      mnemonic: process.env.MNEMONIC || "",
-      count: 10 
-    }
+  docgen: {
+    output: 'docs',
+    pages: 'files',
   }
 };
 
