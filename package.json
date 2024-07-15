@@ -1,6 +1,6 @@
 {
   "name": "@digitalproductpassport/smartcontracts",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Public project for Digital Product Passport with the idea to create an EIP",
   "main": "index.js",
   "scripts": {
