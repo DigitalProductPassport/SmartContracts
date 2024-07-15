@@ -1,6 +1,8 @@
 import { HardhatUserConfig } from "hardhat/types";
 import * as dotenv from "dotenv";
 require('hardhat-abi-exporter');
+require("@nomiclabs/hardhat-waffle");
+require("@nomiclabs/hardhat-ethers");
 
 
 dotenv.config();
