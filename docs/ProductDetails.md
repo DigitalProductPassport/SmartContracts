@@ -1,5 +1,3 @@
-# Solidity API
-
 ## ProductDetails
 
 ### Product

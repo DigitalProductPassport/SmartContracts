@@ -1,0 +1,8 @@
+[
+  "error OwnableInvalidOwner(address owner)",
+  "error OwnableUnauthorizedAccount(address account)",
+  "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
+  "function owner() view returns (address)",
+  "function renounceOwnership()",
+  "function transferOwnership(address newOwner)"
+]

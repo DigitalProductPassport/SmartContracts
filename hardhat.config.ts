@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from "hardhat/types";
 import * as dotenv from "dotenv";
-import 'solidity-docgen';
+require('hardhat-abi-exporter');
+
 
 dotenv.config();
 
@@ -36,9 +37,23 @@ const config: HardhatUserConfig = {
     }
   },
   docgen: {
-    output: 'docs',
+    output: './documentation-web/tutorial-basics',
     pages: 'files',
-  }
+  },
+  abiExporter: [
+    {
+      path: './abi/json',
+      format: "json",
+    },
+    {
+      path: './abi/minimal',
+      format: "minimal",
+    },
+    {
+      path: './abi/fullName',
+      format: "fullName",
+    },
+  ]
 };
 
 export default config;

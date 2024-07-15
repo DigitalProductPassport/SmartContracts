@@ -1,0 +1,458 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "initialOwner",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "entity",
+        "type": "address"
+      }
+    ],
+    "name": "authorizeEntity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "authorizedEntities",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "productId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getProduct",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "uid",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "gtin",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "taricCode",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "manufacturerInfo",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "consumerInfo",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "endOfLifeInfo",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct ProductDetails.Product",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "productId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getProductData",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "string[]",
+            "name": "manuals",
+            "type": "string[]"
+          },
+          {
+            "internalType": "string[]",
+            "name": "specifications",
+            "type": "string[]"
+          },
+          {
+            "internalType": "string",
+            "name": "batchNumber",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "productionDate",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "expiryDate",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "certifications",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "warrantyInfo",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "materialComposition",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "complianceInfo",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct ProductPassport.ProductData",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "productData",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "batchNumber",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "productionDate",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "expiryDate",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "certifications",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "warrantyInfo",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "materialComposition",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "complianceInfo",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "products",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "uid",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "gtin",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "taricCode",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "manufacturerInfo",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "consumerInfo",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "endOfLifeInfo",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "entity",
+        "type": "address"
+      }
+    ],
+    "name": "revokeEntity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "productId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "uid",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "gtin",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "taricCode",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "manufacturerInfo",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "consumerInfo",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "endOfLifeInfo",
+        "type": "string"
+      }
+    ],
+    "name": "setProduct",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "productId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "internalType": "string[]",
+        "name": "manuals",
+        "type": "string[]"
+      },
+      {
+        "internalType": "string[]",
+        "name": "specifications",
+        "type": "string[]"
+      },
+      {
+        "internalType": "string",
+        "name": "batchNumber",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "productionDate",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "expiryDate",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "certifications",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "warrantyInfo",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "materialComposition",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "complianceInfo",
+        "type": "string"
+      }
+    ],
+    "name": "setProductData",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

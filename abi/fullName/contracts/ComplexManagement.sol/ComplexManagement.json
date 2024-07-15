@@ -1,0 +1,20 @@
+[
+  "constructor(address _initialOwner)",
+  "error OwnableInvalidOwner(address owner)",
+  "error OwnableUnauthorizedAccount(address account)",
+  "event ComplexAdded(string complexId, string complexName, string complexCountry, string complexAddress, string complexSiteType, string complexIndustry, string latitude, string longitude)",
+  "event GeolocationAdded(string id, string latitude, string longitude, string additionalInfo)",
+  "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
+  "function addComplex(string _complexId, string _complexName, string _complexCountry, string _complexAddress, string _latitude, string _longitude, string _complexSiteType, string _complexIndustry)",
+  "function addContributor(address _contributor)",
+  "function complexes(string) view returns (string complexId, string complexName, string complexCountry, string complexAddress, string complexSiteType, string complexIndustry, string latitude, string longitude)",
+  "function contributors(address) view returns (bool)",
+  "function geolocations(string) view returns (string latitude, string longitude, string additionalInfo)",
+  "function getComplex(string _complexId) view returns (tuple(string complexId, string complexName, string complexCountry, string complexAddress, string complexSiteType, string complexIndustry, string latitude, string longitude))",
+  "function getGeolocation(string id) view returns (tuple(string latitude, string longitude, string additionalInfo))",
+  "function owner() view returns (address)",
+  "function removeContributor(address _contributor)",
+  "function renounceOwnership()",
+  "function setGeolocation(string id, string latitude, string longitude, string additionalInfo)",
+  "function transferOwnership(address newOwner)"
+]

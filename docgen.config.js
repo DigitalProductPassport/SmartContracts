@@ -1,6 +1,6 @@
 module.exports = {
     input: './contracts',  
-    output: './doc',   
-    templates: './templates',
+    output: './documentation-web/tutorial-basics',   
+    templates: 'docusaurus',
   };
   
