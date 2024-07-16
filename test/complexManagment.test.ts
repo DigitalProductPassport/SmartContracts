@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+require("hardhat");
 
 describe("ComplexManagement", function () {
   let ComplexManagement;
@@ -11,12 +11,12 @@ describe("ComplexManagement", function () {
     const [owner, addr1] = await ethers.getSigners();
     Geolocation = await ethers.getContractFactory("Geolocation");
     geolocation = await Geolocation.deploy();
-    await geolocation.deployed();
+    await geolocation.waitForDeployment();
 
     // Deploy ComplexManagement contract and pass necessary arguments
     ComplexManagement = await ethers.getContractFactory("ComplexManagement");
     complexManagement = await ComplexManagement.deploy(owner.address);
-    await complexManagement.deployed();
+    await complexManagement.waitForDeployment();
   });
 
   it("Should add and retrieve complex details correctly", async function () {

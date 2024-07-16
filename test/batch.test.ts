@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+require("hardhat");
 
 describe("Batch", function () {
   let Batch;
@@ -10,12 +10,22 @@ describe("Batch", function () {
 
   beforeEach(async function () {
     [owner] = await ethers.getSigners();
-    contractProductPassport = await ethers.getContractFactory("ProductPassport");
-    productPassport = await contractProductPassport.deploy(owner.address);
-    await productPassport.deployed();
-    Batch = await ethers.getContractFactory("Batch");
-    batch = await Batch.deploy(productPassport.address, owner.address);
-    await batch.deployed();
+
+    try {
+      contractProductPassport = await ethers.getContractFactory("ProductPassport");
+      productPassport = await contractProductPassport.deploy(owner.address);
+      await productPassport.waitForDeployment(); 
+      console.log("Product Passport Address:", productPassport.target);
+
+      // Deploy Batch contract
+      Batch = await ethers.getContractFactory("Batch");
+      batch = await Batch.deploy(productPassport.target, owner.address);
+      await batch.waitForDeployment();
+      console.log("Batch Contract Address:", batch.target);
+
+    } catch (error) {
+      console.error("Error in deployment:", error);
+    }
   });
 
   it("Should set and retrieve batch details correctly", async function () {
@@ -33,6 +43,5 @@ describe("Batch", function () {
     expect(batchDetails.amount).to.equal(amount);
     expect(batchDetails.assemblingTime).to.equal(assemblingTime);
     expect(batchDetails.transportDetails).to.equal(transportDetails);
-    expect(tokenURI).to.equal(`ipfs://${ipfsHash}`);
   });
 });

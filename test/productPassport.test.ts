@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+require("hardhat");
 
 describe("ProductPassport", function () {
   let ProductPassport;
@@ -11,7 +11,7 @@ describe("ProductPassport", function () {
     [owner, addr1] = await ethers.getSigners();
     ProductPassport = await ethers.getContractFactory("ProductPassport");
     productPassport = await ProductPassport.deploy(owner.address);
-    await productPassport.deployed();
+    await productPassport.waitForDeployment();
     await productPassport.authorizeEntity(owner.address);
   });
 

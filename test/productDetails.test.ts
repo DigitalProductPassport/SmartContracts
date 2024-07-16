@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+require("hardhat");
 
 describe("ProductDetails", function () {
   let ProductDetails;
@@ -10,7 +10,7 @@ describe("ProductDetails", function () {
     [owner] = await ethers.getSigners();
     ProductDetails = await ethers.getContractFactory("ProductDetails");
     productDetails = await ProductDetails.deploy();
-    await productDetails.deployed();
+    await productDetails.waitForDeployment();
     await productDetails.authorizeEntity(owner.address);
   });
 
