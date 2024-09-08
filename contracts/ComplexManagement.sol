@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Geolocation.sol";
 
 contract ComplexManagement is Ownable {
-    Geolocation public geolocationContract;
+    Geolocation public geolocation;
 
     struct Complex {
         string complexName;
@@ -55,7 +55,7 @@ contract ComplexManagement is Ownable {
 
     // Get the complex details along with geolocation
     function getComplexGeolocation(string memory complexId) public view returns (
-        GeoLocation memory
+        Geolocation memory
     ) {
         Complex memory complex = complexes[complexId];
         GeoLocation memory geo = geolocationContract.getGeolocation(complex.geolocationId);

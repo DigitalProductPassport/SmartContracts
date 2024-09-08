@@ -46,12 +46,12 @@ contract IntegratedProductPassportBatch is ERC721URIStorage, Ownable {
         BatchDetails memory,
         ProductPassport.ProductData memory,
         ComplexManagement.Complex memory,
-        Geolocation.GeoLocation memory
+        Geolocation memory
     ) {
         BatchDetails memory batch = batches[batchId];
         (ProductPassport.ProductData memory product, ComplexManagement.Complex memory complex) = productPassport.getProductDetails(productId);
-        Geolocation.GeoLocation memory geoLocation = geolocation.getGeolocation(batch.GeolocationId);
-        Geolocation.GeoLocation memory origin = geolocation.getGeolocation(batch.originGeolocationId);
+        Geolocation memory geoLocation = geolocation.getGeolocation(batch.GeolocationId);
+        Geolocation memory origin = geolocation.getGeolocation(batch.originGeolocationId);
         return (batch, product, complex, geoLocation, origin);
     }
 }
