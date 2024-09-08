@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import "./ComplexManagement.sol";
+import "./Geolocation.sol";
 
-import "./ProductDetails.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-contract ProductPassport is ProductDetails, Ownable {
+contract ProductPassport is ComplexManagement {
     struct ProductData {
         string description;
         string[] manuals;
@@ -14,21 +13,15 @@ contract ProductPassport is ProductDetails, Ownable {
         string expiryDate;
         string certifications;
         string warrantyInfo;
-        string materialComposition;
-        string complianceInfo;
+        address[] materialComposition;
+        string complexId;
     }
 
-    mapping(uint256 => ProductData) public productData;
+    mapping(uint256 => ProductData) public products;
 
-    modifier onlyAuthorized() override {
-        require(authorizedEntities[msg.sender], "Not authorized");
-        _;
-    }
+    event ProductCreated(uint256 productId, string description, string batchNumber, string complexId);
 
-    constructor(address initialOwner) Ownable(initialOwner) {
-    }
-
-    function setProductData(
+    function createProduct(
         uint256 productId,
         string memory description,
         string[] memory manuals,
@@ -38,32 +31,33 @@ contract ProductPassport is ProductDetails, Ownable {
         string memory expiryDate,
         string memory certifications,
         string memory warrantyInfo,
-        string memory materialComposition,
-        string memory complianceInfo
-    ) public onlyAuthorized {
-        productData[productId] = ProductData(
-            description,
-            manuals,
-            specifications,
-            batchNumber,
-            productionDate,
-            expiryDate,
-            certifications,
-            warrantyInfo,
-            materialComposition,
-            complianceInfo
-        );
+        address[] memory materialComposition,
+        string memory complexId
+
+
+
+    ) public {
+        require(bytes(complexId).length != 0, "Complex ID must be provided");
+
+        products[productId] = ProductData({
+            description: description,
+            manuals: manuals,
+            specifications: specifications,
+            batchNumber: batchNumber,
+            productionDate: productionDate,
+            expiryDate: expiryDate,
+            certifications: certifications,
+            warrantyInfo: warrantyInfo,
+            materialComposition: materialComposition,
+            complexId: complexId
+        });
+
+        emit ProductCreated(productId, description, batchNumber, complexId);
     }
 
-    function getProductData(uint256 productId) public view returns (ProductData memory) {
-        return productData[productId];
-    }
-
-    function authorizeEntity(address entity) public override onlyOwner {
-        authorizedEntities[entity] = true;
-    }
-
-    function revokeEntity(address entity) public override onlyOwner {
-        authorizedEntities[entity] = false;
+    function getProductDetails(uint256 productId) public view returns (ProductData memory,  Geolocation.GeoLocation memory) {
+        ProductData memory product = products[productId];
+        Geolocation.GeoLocation memory  origin  = getComplexGeolocation(product.complexId);
+        return (product, origin);
     }
 }

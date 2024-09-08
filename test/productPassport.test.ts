@@ -1,117 +1,104 @@
 import { expect } from "chai";
-require("hardhat");
+import { ethers } from "hardhat";
+import type { ProductPassport, ComplexManagement, Geolocation } from "../types";
 
 describe("ProductPassport", function () {
-  let ProductPassport;
-  let productPassport;
-  let owner;
-  let addr1;
+  let productPassport: ProductPassport;
+  let complexManagement: ComplexManagement;
+  let geolocation: Geolocation;
+  let owner: any;
+  let addr1: any;
 
   beforeEach(async function () {
     [owner, addr1] = await ethers.getSigners();
-    ProductPassport = await ethers.getContractFactory("ProductPassport");
-    productPassport = await ProductPassport.deploy(owner.address);
-    await productPassport.waitForDeployment();
-    await productPassport.authorizeEntity(owner.address);
+
+    const GeolocationFactory = await ethers.getContractFactory("Geolocation");
+    geolocation = await GeolocationFactory.deploy() as Geolocation;
+    await geolocation.waitForDeployment();
+
+  
+    const ComplexManagementFactory = await ethers.getContractFactory("ComplexManagement");
+    complexManagement = await ComplexManagementFactory.deploy(geolocation.getAddress()) as ComplexManagement;
+    await complexManagement.waitForDeployment(); 
+
+    const ProductPassportFactory = await ethers.getContractFactory("ProductPassport");
+    productPassport = await ProductPassportFactory.deploy(complexManagement.getAddress()) as ProductPassport;
+    await productPassport.waitForDeployment(); 
+
+    await complexManagement.addComplex(
+      "complex1",
+      "Test Complex",
+      "Test Country",
+      "Test Address",
+      "0",
+      "0",
+      "Factory",
+      "Manufacturing"
+    );
   });
 
-  it("Should set and retrieve product data correctly", async function () {
+  it("Should create and retrieve product data correctly", async function () {
     const productId = 1;
     const description = "Product description";
-    const manuals = ["Manual 1", "Manual 2"];
-    const specifications = ["Spec 1", "Spec 2"];
     const batchNumber = "Batch-001";
     const productionDate = "2023-01-01";
-    const expiryDate = "2025-01-01";
-    const certifications = "Cert-123";
-    const warrantyInfo = "2 years";
-    const materialComposition = "Material 1, Material 2";
-    const complianceInfo = "Compliant with standard XYZ";
+    const complexId = "complex1";
 
-    await productPassport.setProductData(
+    await productPassport.createProduct(
       productId,
       description,
-      manuals,
-      specifications,
       batchNumber,
       productionDate,
-      expiryDate,
-      certifications,
-      warrantyInfo,
-      materialComposition,
-      complianceInfo
+      complexId
     );
 
-    const productData = await productPassport.getProductData(productId);
+    const [productData, complex] = await productPassport.getProductDetails(productId);
 
     expect(productData.description).to.equal(description);
-    expect(productData.manuals).to.eql(manuals);
-    expect(productData.specifications).to.eql(specifications);
     expect(productData.batchNumber).to.equal(batchNumber);
     expect(productData.productionDate).to.equal(productionDate);
-    expect(productData.expiryDate).to.equal(expiryDate);
-    expect(productData.certifications).to.equal(certifications);
-    expect(productData.warrantyInfo).to.equal(warrantyInfo);
-    expect(productData.materialComposition).to.equal(materialComposition);
-    expect(productData.complianceInfo).to.equal(complianceInfo);
+    expect(productData.complexId).to.equal(complexId);
+    expect(complex.complexId).to.equal(complexId);
   });
 
-  it("Should only allow authorized entities to set product data", async function () {
-    const productId = 1;
+  it("Should allow anyone to create a product", async function () {
+    const productId = 2;
     const description = "Product description";
-    const manuals = ["Manual 1", "Manual 2"];
-    const specifications = ["Spec 1", "Spec 2"];
-    const batchNumber = "Batch-001";
-    const productionDate = "2023-01-01";
-    const expiryDate = "2025-01-01";
-    const certifications = "Cert-123";
-    const warrantyInfo = "2 years";
-    const materialComposition = "Material 1, Material 2";
-    const complianceInfo = "Compliant with standard XYZ";
+    const batchNumber = "Batch-002";
+    const productionDate = "2023-02-01";
+    const complexId = "complex1";
+
+    await productPassport.connect(addr1).createProduct(
+      productId,
+      description,
+      batchNumber,
+      productionDate,
+      complexId
+    );
+
+    const [productData, _] = await productPassport.getProductDetails(productId);
+
+    expect(productData.description).to.equal(description);
+    expect(productData.batchNumber).to.equal(batchNumber);
+    expect(productData.productionDate).to.equal(productionDate);
+    expect(productData.complexId).to.equal(complexId);
+  });
+
+  it("Should fail to create a product with non-existent complex", async function () {
+    const productId = 3;
+    const description = "Product description";
+    const batchNumber = "Batch-003";
+    const productionDate = "2023-03-01";
+    const nonExistentComplexId = "nonexistent";
 
     await expect(
-      productPassport.connect(addr1).setProductData(
+      productPassport.createProduct(
         productId,
         description,
-        manuals,
-        specifications,
         batchNumber,
         productionDate,
-        expiryDate,
-        certifications,
-        warrantyInfo,
-        materialComposition,
-        complianceInfo
+        nonExistentComplexId
       )
-    ).to.be.revertedWith("Not authorized");
-
-    await productPassport.authorizeEntity(addr1.address);
-
-    await productPassport.connect(addr1).setProductData(
-      productId,
-      description,
-      manuals,
-      specifications,
-      batchNumber,
-      productionDate,
-      expiryDate,
-      certifications,
-      warrantyInfo,
-      materialComposition,
-      complianceInfo
-    );
-
-    const productData = await productPassport.getProductData(productId);
-
-    expect(productData.description).to.equal(description);
-    expect(productData.manuals).to.eql(manuals);
-    expect(productData.specifications).to.eql(specifications);
-    expect(productData.batchNumber).to.equal(batchNumber);
-    expect(productData.productionDate).to.equal(productionDate);
-    expect(productData.expiryDate).to.equal(expiryDate);
-    expect(productData.certifications).to.equal(certifications);
-    expect(productData.warrantyInfo).to.equal(warrantyInfo);
-    expect(productData.materialComposition).to.equal(materialComposition);
-    expect(productData.complianceInfo).to.equal(complianceInfo);
+    ).to.be.revertedWith("Complex does not exist");  
   });
 });

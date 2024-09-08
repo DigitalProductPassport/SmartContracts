@@ -1,87 +1,71 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Geolocation.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./Geolocation.sol";
 
-contract ComplexManagement is Ownable,Geolocation {
+contract ComplexManagement is Ownable {
+    Geolocation public geolocationContract;
+
     struct Complex {
-        string complexId;
         string complexName;
         string complexCountry;
         string complexAddress;
         string complexSiteType;
         string complexIndustry;
-        string latitude;
-        string longitude;
+        string geolocationId;
     }
 
     mapping(string => Complex) public complexes;
-    mapping(address => bool) public contributors;
 
-    event ComplexAdded(
-        string complexId,
-        string complexName,
-        string complexCountry,
-        string complexAddress,
-        string complexSiteType,
-        string complexIndustry,
-        string latitude,
-        string longitude
-    );
+    event ComplexAdded(string complexId, string complexName, string complexCountry);
 
-    constructor(address _initialOwner) Ownable(_initialOwner) {
+    constructor() Ownable(owner()) {
+        
     }
 
+    // Add a new complex and set the geolocation using the Geolocation contract
     function addComplex(
-        string memory _complexId,
-        string memory _complexName,
-        string memory _complexCountry,
-        string memory _complexAddress,
-        string memory _latitude,
-        string memory _longitude,
-        string memory _complexSiteType,
-        string memory _complexIndustry
-    ) external onlyOwnerOrContributor {
-        complexes[_complexId] = Complex({
-            complexId: _complexId,
-            complexName: _complexName,
-            complexCountry: _complexCountry,
-            complexAddress: _complexAddress,
-            complexSiteType: _complexSiteType,
-            complexIndustry: _complexIndustry,
-            latitude: _latitude,
-            longitude: _longitude
-        });
+        string memory complexId,
+        string memory complexName,
+        string memory complexCountry,
+        string memory complexAddress,
+        string memory geolocationId,  // Reference the Geolocation by an ID
+        string memory complexSiteType,
+        string memory complexIndustry,
+        string memory latitude,  // Latitude for geolocation
+        string memory longitude,  // Longitude for geolocation
+        string memory additionalInfo  // Additional info for geolocation
+    ) public onlyOwner {
+        // Store the geolocation in the Geolocation contract
+        geolocationContract.setGeolocation(geolocationId, latitude, longitude, additionalInfo);
 
-        setGeolocation(_complexId, _latitude, _longitude, _complexAddress);
-
-        emit ComplexAdded(
-            _complexId,
-            _complexName,
-            _complexCountry,
-            _complexAddress,
-            _complexSiteType,
-            _complexIndustry,
-            _latitude,
-            _longitude
+        // Add the complex details (excluding geolocation data)
+        complexes[complexId] = Complex(
+            complexName, 
+            complexCountry, 
+            complexAddress, 
+            complexSiteType, 
+            complexIndustry, 
+            geolocationId
         );
+
+        emit ComplexAdded(complexId, complexName, complexCountry);
     }
 
-    function getComplex(string memory _complexId) public view returns (Complex memory) {
-        return complexes[_complexId];
+    // Get the complex details along with geolocation
+    function getComplexGeolocation(string memory complexId) public view returns (
+        GeoLocation memory
+    ) {
+        Complex memory complex = complexes[complexId];
+        GeoLocation memory geo = geolocationContract.getGeolocation(complex.geolocationId);
+        return geo;
     }
 
-    modifier onlyOwnerOrContributor() {
-        require(owner() == _msgSender() || contributors[_msgSender()], "Ownable: caller is not the owner nor a contributor");
-        _;
-    }
-
-    function addContributor(address _contributor) external onlyOwner {
-        contributors[_contributor] = true;
-    }
-
-    function removeContributor(address _contributor) external onlyOwner {
-        contributors[_contributor] = false;
+        function getComplex(string memory complexId) public view returns (
+        Complex memory
+    ) {
+        Complex memory complex = complexes[complexId];
+        return complex;
     }
 }

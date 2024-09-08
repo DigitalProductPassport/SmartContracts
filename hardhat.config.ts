@@ -2,6 +2,8 @@ import { HardhatUserConfig } from "hardhat/types";
 import * as dotenv from "dotenv";
 require('hardhat-abi-exporter');
 require('@nomicfoundation/hardhat-toolbox')
+import '@typechain/hardhat'
+
 
 
 dotenv.config();
@@ -37,24 +39,14 @@ const config: HardhatUserConfig = {
       accounts: []
     }
   },
+  typechain: {
+    outDir: "types",
+    target: "ethers-v6",
+  },
   docgen: {
     output: './documentation-web/tutorial-basics',
     pages: 'files',
-  },
-  abiExporter: [
-    {
-      path: './abi/json',
-      format: "json",
-    },
-    {
-      path: './abi/minimal',
-      format: "minimal",
-    },
-    {
-      path: './abi/fullName',
-      format: "fullName",
-    },
-  ]
+  }
 };
 
 export default config;

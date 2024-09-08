@@ -1,6 +1,0 @@
-[
-  "event GeolocationAdded(string id, string latitude, string longitude, string additionalInfo)",
-  "function geolocations(string) view returns (string latitude, string longitude, string additionalInfo)",
-  "function getGeolocation(string id) view returns (tuple(string latitude, string longitude, string additionalInfo))",
-  "function setGeolocation(string id, string latitude, string longitude, string additionalInfo)"
-]

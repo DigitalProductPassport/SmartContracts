@@ -1,8 +1,0 @@
-[
-  "function authorizeEntity(address)",
-  "function authorizedEntities(address) view returns (bool)",
-  "function getProduct(uint256) view returns (tuple(string,string,string,string,string,string))",
-  "function products(uint256) view returns (string, string, string, string, string, string)",
-  "function revokeEntity(address)",
-  "function setProduct(uint256,string,string,string,string,string,string)"
-]

@@ -1,13 +1,16 @@
 {
   "name": "@digitalproductpassport/smartcontracts",
-  "version": "1.0.5",
+  "version": "1.0.23",
   "description": "Public project for Digital Product Passport with the idea to create an EIP",
   "main": "index.js",
   "scripts": {
     "test": "npx hardhat test",
     "prepublishOnly": "npx hardhat compile",
     "deploySepolia": "npx hardhat run scripts/deploy.ts --network sepolia",
-    "docgen": "npx hardhat docgen"
+    "docgen": "npx hardhat docgen",
+    "typechain": "npx hardhat typechain",
+    "prettier:check": "prettier --check \"**/*.{js,json,md,sol,ts,yml}\"",
+    "prettier:write": "prettier --write \"**/*.{js,json,md,sol,ts,yml}\""
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.7",
