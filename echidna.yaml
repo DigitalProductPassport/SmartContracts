@@ -1,0 +1,7 @@
+testMode: assertion
+testLimit: 10000
+corpusDir: corpus
+# Specify any contracts you want to focus testing on
+contractAddr: "0x00a329c0648769A73afAc7F9381E08FB43dBEA72"
+deployer: "0x30000"
+sender: ["0x10000", "0x20000", "0x30000"]
