@@ -23,7 +23,6 @@
     "@nomicfoundation/ignition-core": "^0.15.5",
     "@openzeppelin/contracts": "^5.2.0",
     "@openzeppelin/contracts-upgradeable": "^5.2.0",
-    "@openzeppelin/hardhat-upgrades": "^2.1.0",
     "@solidity-coverage/hardhat": "^0.8.12",
     "@solidity-docgen/cli": "^0.5.17",
     "@typechain/ethers-v6": "^0.5.1",
