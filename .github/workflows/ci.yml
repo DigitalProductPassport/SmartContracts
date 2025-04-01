@@ -37,28 +37,6 @@ jobs:
       - name: Install dependencies and create lock file
         run: npm install
       
-      - name: Create solc-config.json for Mythril
-        run: |
-          cat > solc-config.json << 'EOL'
-          {
-            "outputSelection": {
-              "*": {
-                "*": [
-                  "metadata",
-                  "evm.bytecode",
-                  "evm.deployedBytecode",
-                  "abi",
-                  "evm.methodIdentifiers"
-                ]
-              }
-            },
-            "optimizer": {
-              "enabled": true,
-              "runs": 200
-            }
-          }
-          EOL
-      
       - name: Compile contracts
         run: npx hardhat compile
         continue-on-error: false
@@ -102,13 +80,6 @@ jobs:
             myth analyze "$file" --solc-json solc-config.json --markdown-report reports/$(basename "$file").md || echo "Mythril found issues in $file"
           done
         continue-on-error: true
-      
-      - name: Archive security reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: security-reports
-          path: reports/
-        if: always()
 
   gas-reporter:
     runs-on: ubuntu-latest
