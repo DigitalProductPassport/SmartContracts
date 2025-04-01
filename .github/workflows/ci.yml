@@ -35,7 +35,7 @@ jobs:
           # Or set cache-dependency-path explicitly if needed
       
       - name: Install dependencies and create lock file
-        run: npm install
+        run: npm install --legacy-peer-deps
       
       - name: Compile contracts
         run: npx hardhat compile
@@ -48,6 +48,12 @@ jobs:
       - name: Run tests with coverage
         run: npx hardhat coverage
         continue-on-error: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
       
       - name: Run Slither
         uses: crytic/slither-action@v0.4.0
@@ -59,12 +65,6 @@ jobs:
           target: contracts
           solc-version: 0.8.20
         continue-on-error: true
-      
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip'
       
       - name: Install Mythril
         run: |
@@ -78,7 +78,7 @@ jobs:
           echo "Analyzing $file with Mythril..."
           myth analyze contracts/*.sol --solc-json solc-config.json --markdown-report reports/$(basename "$file").md
         continue-on-error: true
-        
+
       - name: Run Echidna
         uses: crytic/echidna-action@v2
         with:
