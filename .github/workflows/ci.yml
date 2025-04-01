@@ -32,8 +32,23 @@ jobs:
         id: slither
         with:
           node-version: 18
-          sarif: results.sarif
+          sarif: slither-results.sarif
           fail-on: none
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install Mythril
+        run: |
+          pip install mythril
+      - name: Run Mythril Analysis
+        run: |
+          # Get all Solidity files from the contracts directory
+          find contracts -name "*.sol" -type f | while read -r file; do
+            echo "Analyzing $file with Mythril..."
+            myth analyze "$file" --solc-json solc-config.json || echo "Mythril found issues in $file"
+          done
+        continue-on-error: true
 
   publish:
     needs: build
