@@ -68,6 +68,7 @@ jobs:
           fail-on: none
           target: contracts
           solc-version: 0.8.20
+          ignore-compile: true
         continue-on-error: true
       
       - name: Install Mythril
