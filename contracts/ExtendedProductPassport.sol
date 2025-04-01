@@ -115,9 +115,8 @@ contract IntegratedProductPassportBatch is ERC721URIStorage, Ownable {
         return (batch, product, complex, currentLocation, originLocation);
     }
 
-    // Token URI management
     function setTokenURI(uint256 batchId, string memory tokenURI) external onlyOwner {
-        require((batchId), "Batch NFT does not exist");
+        require(_exists(batchId), "Batch NFT does not exist");
         _setTokenURI(batchId, tokenURI);
     }
 }

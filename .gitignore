@@ -144,3 +144,5 @@ artifacts
 # Remix files
 .states
 
+# vscode files
+.vscode

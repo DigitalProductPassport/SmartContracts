@@ -2,9 +2,11 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
 import "./Geolocation.sol";
 
-contract ComplexManagement is Ownable {
+contract ComplexManagement is Ownable, ReentrancyGuard {
     Geolocation public geolocationContract;
 
     struct Complex {
@@ -44,7 +46,7 @@ function addComplex(
     string memory latitude,
     string memory longitude,
     string memory additionalInfo
-) public onlyOwner nonReentrant {
+) public onlyOwner {
     require(address(geolocationContract) != address(0), "Geolocation contract not set");
     require(bytes(complexId).length > 0, "Complex ID cannot be empty");
     require(bytes(complexes[complexId].complexName).length == 0, "Complex ID already exists");
