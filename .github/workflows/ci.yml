@@ -25,6 +25,27 @@ jobs:
           node-version: '18'
       - name: Install dependencies
         run: npm install
+      - name: Create solc-config.json
+        run: |
+          cat > solc-config.json << 'EOL'
+          {
+            "outputSelection": {
+              "*": {
+                "*": [
+                  "metadata",
+                  "evm.bytecode",
+                  "evm.deployedBytecode",
+                  "abi",
+                  "evm.methodIdentifiers"
+                ]
+              }
+            },
+            "optimizer": {
+              "enabled": true,
+              "runs": 200
+            }
+          }
+          EOL
       - name: Run tests
         run: npx hardhat test
         continue-on-error: true
@@ -36,6 +57,7 @@ jobs:
           sarif: slither-results.sarif
           fail-on: none
           target: contracts/*
+          solc-version: 0.8.19
         continue-on-error: true
       - name: Setup Python
         uses: actions/setup-python@v4
