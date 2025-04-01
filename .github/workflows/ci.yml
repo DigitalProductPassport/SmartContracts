@@ -36,6 +36,11 @@ jobs:
       
       - name: Install dependencies and create lock file
         run: npm install --legacy-peer-deps
+
+      - name: Install OpenZeppelin contracts
+        run: | 
+          npm install @openzeppelin/contracts
+          npm install @openzeppelin/contracts-upgradeable
       
       - name: Compile contracts
         run: npx hardhat compile
