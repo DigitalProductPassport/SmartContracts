@@ -2,11 +2,9 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-
 import "./Geolocation.sol";
 
-contract ComplexManagement is Ownable, ReentrancyGuard {
+contract ComplexManagement is Ownable {
     Geolocation public geolocationContract;
 
     struct Complex {
