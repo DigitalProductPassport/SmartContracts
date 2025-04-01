@@ -31,10 +31,33 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
+          # Remove cache option since there's no lock file
+          # Or set cache-dependency-path explicitly if needed
       
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies and create lock file
+        run: npm install
+      
+      - name: Create solc-config.json for Mythril
+        run: |
+          cat > solc-config.json << 'EOL'
+          {
+            "outputSelection": {
+              "*": {
+                "*": [
+                  "metadata",
+                  "evm.bytecode",
+                  "evm.deployedBytecode",
+                  "abi",
+                  "evm.methodIdentifiers"
+                ]
+              }
+            },
+            "optimizer": {
+              "enabled": true,
+              "runs": 200
+            }
+          }
+          EOL
       
       - name: Compile contracts
         run: npx hardhat compile
@@ -79,6 +102,13 @@ jobs:
             myth analyze "$file" --solc-json solc-config.json --markdown-report reports/$(basename "$file").md || echo "Mythril found issues in $file"
           done
         continue-on-error: true
+      
+      - name: Archive security reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: reports/
+        if: always()
 
   gas-reporter:
     runs-on: ubuntu-latest
@@ -90,10 +120,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
+          # Remove cache option
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       
       - name: Run gas reporter
         run: |
@@ -117,10 +147,10 @@ jobs:
         with:
           node-version: '18'
           registry-url: "https://registry.npmjs.org"
-          cache: 'npm'
-
+          # Remove cache option
+      
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Set Git user
         run: |
