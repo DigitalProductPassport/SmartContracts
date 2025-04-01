@@ -33,37 +33,37 @@ contract ComplexManagement is Ownable {
     }
 
     // Add a new complex and set the geolocation using the Geolocation contract
-    function addComplex(
-        string memory complexId,
-        string memory complexName,
-        string memory complexCountry,
-        string memory complexAddress,
-        string memory geolocationId,  // Reference the Geolocation by an ID
-        string memory complexSiteType,
-        string memory complexIndustry,
-        string memory latitude,  // Latitude for geolocation
-        string memory longitude,  // Longitude for geolocation
-        string memory additionalInfo  // Additional info for geolocation
-    ) public onlyOwner {
-        require(address(geolocationContract) != address(0), "Geolocation contract not set");
-        require(bytes(complexId).length > 0, "Complex ID cannot be empty");
-        require(bytes(complexes[complexId].complexName).length == 0, "Complex ID already exists");
-        
-        // Store the geolocation in the Geolocation contract
-        geolocationContract.setGeolocation(geolocationId, latitude, longitude, additionalInfo);
+function addComplex(
+    string memory complexId,
+    string memory complexName,
+    string memory complexCountry,
+    string memory complexAddress,
+    string memory geolocationId,
+    string memory complexSiteType,
+    string memory complexIndustry,
+    string memory latitude,
+    string memory longitude,
+    string memory additionalInfo
+) public onlyOwner nonReentrant {
+    require(address(geolocationContract) != address(0), "Geolocation contract not set");
+    require(bytes(complexId).length > 0, "Complex ID cannot be empty");
+    require(bytes(complexes[complexId].complexName).length == 0, "Complex ID already exists");
+    
+    // Store the geolocation in the Geolocation contract
+    geolocationContract.setGeolocation(geolocationId, latitude, longitude, additionalInfo);
 
-        // Add the complex details (excluding geolocation data)
-        complexes[complexId] = Complex(
-            complexName, 
-            complexCountry, 
-            complexAddress, 
-            complexSiteType, 
-            complexIndustry, 
-            geolocationId
-        );
+    // Add the complex details (excluding geolocation data)
+    complexes[complexId] = Complex(
+        complexName, 
+        complexCountry, 
+        complexAddress, 
+        complexSiteType, 
+        complexIndustry, 
+        geolocationId
+    );
 
-        emit ComplexAdded(complexId, complexName, complexCountry);
-    }
+    emit ComplexAdded(complexId, complexName, complexCountry);
+}
 
     // Update an existing complex
     function updateComplex(
