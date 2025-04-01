@@ -56,7 +56,7 @@ jobs:
           node-version: 18
           sarif: slither-results.sarif
           fail-on: none
-          target: contracts/*
+          target: contracts
           solc-version: 0.8.20
         continue-on-error: true
       
@@ -75,10 +75,8 @@ jobs:
         run: |
           mkdir -p reports
           # Get all Solidity files from the contracts directory
-          find contracts -name "*.sol" -type f | while read -r file; do
-            echo "Analyzing $file with Mythril..."
-            myth analyze "$file" --solc-json solc-config.json --markdown-report reports/$(basename "$file").md || echo "Mythril found issues in $file"
-          done
+          echo "Analyzing $file with Mythril..."
+          myth analyze contracts/*.sol --solc-json solc-config.json --markdown-report reports/$(basename "$file").md
         continue-on-error: true
 
   gas-reporter:
