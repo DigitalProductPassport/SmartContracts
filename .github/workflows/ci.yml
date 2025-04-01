@@ -41,28 +41,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Create solc-config.json
-        run: |
-          cat > solc-config.json << 'EOL'
-          {
-            "outputSelection": {
-              "*": {
-                "*": [
-                  "metadata",
-                  "evm.bytecode",
-                  "evm.deployedBytecode",
-                  "abi",
-                  "evm.methodIdentifiers"
-                ]
-              }
-            },
-            "optimizer": {
-              "enabled": true,
-              "runs": 200
-            }
-          }
-          EOL
-      
       - name: Compile contracts
         run: npx hardhat compile
         continue-on-error: false
@@ -74,12 +52,6 @@ jobs:
       - name: Run tests with coverage
         run: npx hardhat coverage
         continue-on-error: true
-      
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
       
       - name: Run Slither
         uses: crytic/slither-action@v0.4.0
@@ -119,13 +91,6 @@ jobs:
             myth analyze "$file" --solc-json solc-config.json --markdown-report reports/$(basename "$file").md || echo "Mythril found issues in $file"
           done
         continue-on-error: true
-      
-      - name: Archive security reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: security-reports
-          path: reports/
-        if: always()
 
   gas-reporter:
     runs-on: ubuntu-latest
