@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Geolocation.sol";
 
 contract ComplexManagement is Ownable {
-    Geolocation public geolocation;
+    Geolocation public geolocationContract;
 
     struct Complex {
         string complexName;
@@ -19,9 +19,17 @@ contract ComplexManagement is Ownable {
     mapping(string => Complex) public complexes;
 
     event ComplexAdded(string complexId, string complexName, string complexCountry);
+    event ComplexUpdated(string complexId, string complexName, string complexCountry);
+    event ComplexRemoved(string complexId);
+    event GeolocationContractSet(address geolocationContractAddress);
 
-    constructor() Ownable(owner()) {
-        
+    constructor(address initialOwner) Ownable(initialOwner) {}
+
+    // Set the Geolocation contract address
+    function setGeolocationContract(address _geolocationContract) public onlyOwner {
+        require(_geolocationContract != address(0), "Invalid geolocation contract address");
+        geolocationContract = Geolocation(_geolocationContract);
+        emit GeolocationContractSet(_geolocationContract);
     }
 
     // Add a new complex and set the geolocation using the Geolocation contract
@@ -37,6 +45,10 @@ contract ComplexManagement is Ownable {
         string memory longitude,  // Longitude for geolocation
         string memory additionalInfo  // Additional info for geolocation
     ) public onlyOwner {
+        require(address(geolocationContract) != address(0), "Geolocation contract not set");
+        require(bytes(complexId).length > 0, "Complex ID cannot be empty");
+        require(bytes(complexes[complexId].complexName).length == 0, "Complex ID already exists");
+        
         // Store the geolocation in the Geolocation contract
         geolocationContract.setGeolocation(geolocationId, latitude, longitude, additionalInfo);
 
@@ -53,19 +65,56 @@ contract ComplexManagement is Ownable {
         emit ComplexAdded(complexId, complexName, complexCountry);
     }
 
+    // Update an existing complex
+    function updateComplex(
+        string memory complexId,
+        string memory complexName,
+        string memory complexCountry,
+        string memory complexAddress,
+        string memory complexSiteType,
+        string memory complexIndustry
+    ) public onlyOwner {
+        require(bytes(complexes[complexId].complexName).length > 0, "Complex does not exist");
+        
+        Complex storage complex = complexes[complexId];
+        complex.complexName = complexName;
+        complex.complexCountry = complexCountry;
+        complex.complexAddress = complexAddress;
+        complex.complexSiteType = complexSiteType;
+        complex.complexIndustry = complexIndustry;
+
+        emit ComplexUpdated(complexId, complexName, complexCountry);
+    }
+
+    // Remove a complex
+    function removeComplex(string memory complexId) public onlyOwner {
+        require(bytes(complexes[complexId].complexName).length > 0, "Complex does not exist");
+        delete complexes[complexId];
+        emit ComplexRemoved(complexId);
+    }
+
     // Get the complex details along with geolocation
     function getComplexGeolocation(string memory complexId) public view returns (
-        Geolocation memory
+        Geolocation.GeoLocation memory
     ) {
         Complex memory complex = complexes[complexId];
-        GeoLocation memory geo = geolocationContract.getGeolocation(complex.geolocationId);
+        require(bytes(complex.complexName).length > 0, "Complex does not exist");
+        require(address(geolocationContract) != address(0), "Geolocation contract not set");
+        
+        Geolocation.GeoLocation memory geo = geolocationContract.getGeolocation(complex.geolocationId);
         return geo;
     }
 
-        function getComplex(string memory complexId) public view returns (
+    // Get the complex details
+    function getComplex(string memory complexId) public view returns (
         Complex memory
     ) {
-        Complex memory complex = complexes[complexId];
-        return complex;
+        require(bytes(complexes[complexId].complexName).length > 0, "Complex does not exist");
+        return complexes[complexId];
+    }
+
+    // Check if a complex exists
+    function complexExists(string memory complexId) public view returns (bool) {
+        return bytes(complexes[complexId].complexName).length > 0;
     }
 }
