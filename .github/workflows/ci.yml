@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'contracts/**'
-      - 'test/**'
-      - 'scripts/**'
-      - 'package.json'
   pull_request:
     branches:
       - main
@@ -62,13 +57,6 @@ jobs:
           fail-on: none
           target: contracts/*
           solc-version: 0.8.20
-        continue-on-error: true
-      
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: slither-results.sarif
-          wait-for-processing: true
         continue-on-error: true
       
       - name: Setup Python
