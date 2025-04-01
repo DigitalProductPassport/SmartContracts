@@ -69,6 +69,8 @@ jobs:
           target: contracts
           solc-version: 0.8.20
           ignore-compile: true
+        env:
+          SOLC_VERSION: 0.8.20
         continue-on-error: true
       
       - name: Install Mythril
@@ -77,6 +79,8 @@ jobs:
         continue-on-error: true
       
       - name: Run Mythril Analysis
+        env:
+          SOLC_VERSION: 0.8.20
         run: |
           mkdir -p reports
           # Get all Solidity files from the contracts directory
@@ -86,6 +90,8 @@ jobs:
 
       - name: Run Echidna
         uses: crytic/echidna-action@v2
+        env:
+          SOLC_VERSION: 0.8.20
         with:
           solc-version: '0.8.20'
           files: 'contracts/ProductPassportEchidnaTest.sol'
