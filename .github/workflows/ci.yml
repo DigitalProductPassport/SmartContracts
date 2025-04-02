@@ -64,7 +64,6 @@ jobs:
         id: slither
         with:
           node-version: 18
-          sarif: slither-results.sarif
           fail-on: none
           target: contracts
           solc-version: 0.8.20
@@ -85,7 +84,7 @@ jobs:
           mkdir -p reports
           # Get all Solidity files from the contracts directory
           echo "Analyzing $file with Mythril..."
-          myth analyze contracts/*.sol --solc-json solc-config.json --markdown-report reports/$(basename "$file").md
+          myth analyze ./contracts/ProductPassport.sol --solv 0.8.20  -o markdown
         continue-on-error: true
 
       - name: Run Echidna
