@@ -76,6 +76,8 @@ jobs:
       - name: Install Mythril
         run: |
           pip install mythril
+          solc-select install ${SOLC_VERSION}
+          solc-select use ${SOLC_VERSION}
         continue-on-error: true
       
       - name: Run Mythril Analysis
@@ -84,8 +86,10 @@ jobs:
         run: |
           mkdir -p reports
           # Get all Solidity files from the contracts directory
-          echo "Analyzing $file with Mythril..."
-          myth analyze contracts/*.sol --solc-json solc-config.json --markdown-report reports/$(basename "$file").md
+          for file in contracts/*.sol; do
+            echo "Analyzing $file with Mythril..."
+            myth analyze "$file" --solv $SOLC_VERSION --markdown-report reports/$(basename "$file").md
+          done
         continue-on-error: true
 
       - name: Run Echidna

@@ -55,6 +55,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@openzeppelin/contracts-upgradeable": "^5.0.2"
+    "solc": "^0.8.29"
   }
 }
