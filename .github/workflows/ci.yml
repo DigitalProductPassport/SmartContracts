@@ -41,6 +41,7 @@ jobs:
         run: | 
           npm install @openzeppelin/contracts
           npm install @openzeppelin/contracts-upgradeable
+          npm install solc
       
       - name: Compile contracts
         run: npx hardhat compile
