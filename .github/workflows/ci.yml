@@ -30,7 +30,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '2'
+          node-version: '20'
           # Remove cache option since there's no lock file
           # Or set cache-dependency-path explicitly if needed
       
@@ -64,7 +64,7 @@ jobs:
         uses: crytic/slither-action@v0.4.0
         id: slither
         with:
-          node-version: 24
+          node-version: 20
           fail-on: none
           target: contracts
           solc-version: 0.8.20
@@ -116,7 +116,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
           # Remove cache option
       
       - name: Install dependencies
