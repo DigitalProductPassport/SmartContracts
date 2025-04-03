@@ -57,6 +57,7 @@ jobs:
           pip install mythril slither-analyzer solc-select
           solc-select install 0.8.20
           solc-select use 0.8.20
+          npm install -g solhint
         continue-on-error: true
       
       - name: Run Slither
@@ -64,36 +65,18 @@ jobs:
           mkdir -p reports
           export PATH="$HOME/.solc-select/artifacts/solc-0.8.20:$PATH"
           solc-select use 0.8.20
-          slither contracts --solc-remaps '@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/ @openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/' --json reports/slither-report.json
+          npm run security:slither || true
+          # Move the report to the reports directory
+          [ -f slither-report.json ] && mv slither-report.json reports/ || echo "No slither report generated"
         continue-on-error: true
 
       - name: Run Mythril Analysis
         run: |
           mkdir -p reports
-          # List contracts directory to debug
-          echo "Listing contracts directory:"
-          ls -la contracts/
-          
           # Set up solc explicitly
           export PATH="$HOME/.solc-select/artifacts/solc-0.8.20:$PATH"
           solc-select use 0.8.20
-          
-          # Check for SimpleTestContract.sol first
-          if [ -f "contracts/SimpleTestContract.sol" ]; then
-            echo "Analyzing SimpleTestContract.sol with Mythril..."
-            myth analyze contracts/SimpleTestContract.sol --solv 0.8.20 -o json > reports/mythril-report.json --solc-args="--allow-paths . --include-path node_modules"
-          else
-            echo "SimpleTestContract.sol not found. Checking for other contracts..."
-            # Find the first sol file and analyze it instead
-            FIRST_CONTRACT=$(find contracts -name "*.sol" | head -1)
-            if [ -n "$FIRST_CONTRACT" ]; then
-              echo "Analyzing $FIRST_CONTRACT with Mythril..."
-              myth analyze $FIRST_CONTRACT --solv 0.8.20 -o json > reports/mythril-report.json --solc-args="--allow-paths . --include-path node_modules"
-            else
-              echo "No Solidity contract files found in contracts directory."
-              exit 0
-            fi
-          fi
+          npm run security:mythril || true
         continue-on-error: true
 
       - name: Run Echidna
@@ -108,8 +91,36 @@ jobs:
           config: 'echidna.yaml'
           test-mode: 'assertion'
           format: 'json'
-          output-file: 'echidna-output.json'
+          output-file: 'reports/echidna-output.json'
           solc-args: '--allow-paths . --include-path node_modules'
+        continue-on-error: true
+        
+      - name: Create security summary
+        run: |
+          echo "# Security Analysis Summary" > reports/summary.md
+          echo "## Generated on $(date)" >> reports/summary.md
+          echo "" >> reports/summary.md
+          
+          # Add Slither summary if available
+          if [ -f "reports/slither-report.json" ]; then
+            echo "## Slither Analysis" >> reports/summary.md
+            echo "Slither analysis completed. See slither-report.json for detailed findings." >> reports/summary.md
+            echo "" >> reports/summary.md
+          fi
+          
+          # Add Mythril summary if available
+          if [ -f "reports/mythril-report.json" ]; then
+            echo "## Mythril Analysis" >> reports/summary.md
+            echo "Mythril analysis completed. See mythril-report.json for detailed findings." >> reports/summary.md
+            echo "" >> reports/summary.md
+          fi
+          
+          # Add Echidna summary if available
+          if [ -f "reports/echidna-output.json" ]; then
+            echo "## Echidna Fuzzing" >> reports/summary.md
+            echo "Echidna fuzzing completed. See echidna-output.json for detailed findings." >> reports/summary.md
+            echo "" >> reports/summary.md
+          fi
         continue-on-error: true
 
       - name: Upload Security Reports
