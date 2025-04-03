@@ -87,9 +87,9 @@ jobs:
           test-mode: 'assertion'
           format: 'json'
           output-file: 'reports/echidna-output.json'
-          solc-args: '--allow-paths . --include-path node_modules'
+          solc-args: '--allow-paths . --include-path ./node_modules'
         continue-on-error: true
-        
+
       - name: Run Mythril Analysis on first contract
         run: |
           mkdir -p reports
