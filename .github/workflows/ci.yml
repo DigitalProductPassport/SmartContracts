@@ -82,17 +82,10 @@ jobs:
           # Set up solc explicitly
           export PATH="$HOME/.solc-select/artifacts/solc-0.8.20:$PATH"
           solc-select use 0.8.20
-          
           # Find the first contract file
-          FIRST_CONTRACT=$(find contracts -name "*.sol" -type f | sort | head -1)
-          
-          if [ -n "$FIRST_CONTRACT" ]; then
-            echo "Analyzing $FIRST_CONTRACT with Mythril..."
-            myth analyze "$FIRST_CONTRACT" --solv 0.8.20 -o json --solc-args="--allow-paths $(pwd)" > reports/mythril-report.json
-          else
-            echo "No contract files found"
-            exit 0
-          fi
+          echo "Analyzing $FIRST_CONTRACT with Mythril..."
+          npm run security:mythril-single
+
         continue-on-error: true
 
       - name: Run Echidna
