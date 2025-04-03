@@ -21,36 +21,28 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
-          # Remove cache option since there's no lock file
-          # Or set cache-dependency-path explicitly if needed
-      
-      - name: Install dependencies and create lock file
-        run: npm install --legacy-peer-deps
+          node-version: '20'
 
-      - name: Install OpenZeppelin contracts
-        run: | 
-          npm install @openzeppelin/contracts
-          npm install @openzeppelin/contracts-upgradeable
-          npm install solc
-      
+      - name: Install dependencies
+        run: npm ci
+
       - name: Compile contracts
         run: npx hardhat compile
-        continue-on-error: false
-      
+
       - name: Run linter
         run: npx solhint 'contracts/**/*.sol'
         continue-on-error: true
-      
+
       - name: Run tests with coverage
         run: npx hardhat coverage
         continue-on-error: true
@@ -59,18 +51,19 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+
       - name: Install Mythril and Dependencies
         run: |
           pip install mythril
           solc-select install 0.8.20
           solc-select use 0.8.20
         continue-on-error: true
-      
+
       - name: Run Slither
         uses: crytic/slither-action@v0.4.0
         id: slither
         with:
-          node-version: 22
+          node-version: 20
           fail-on: none
           target: contracts
           solc-version: 0.8.20
@@ -79,13 +72,12 @@ jobs:
         env:
           SOLC_VERSION: 0.8.20
         continue-on-error: true
-      
+
       - name: Run Mythril Analysis
         env:
           SOLC_VERSION: 0.8.20
         run: |
           mkdir -p reports
-          # Only analyze SimpleTestContract to avoid dependency issues
           echo "Analyzing SimpleTestContract.sol with Mythril..."
           myth analyze contracts/SimpleTestContract.sol --solv ${{ env.SOLC_VERSION }} -o json --solc-args="--allow-paths . --include-path node_modules"
         continue-on-error: true
@@ -108,19 +100,19 @@ jobs:
 
   gas-reporter:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
-          # Remove cache option
-      
+          node-version: '20'
+
       - name: Install dependencies
-        run: npm install
-      
+        run: npm ci
+
       - name: Run gas reporter
         run: |
           REPORT_GAS=true npx hardhat test
@@ -132,6 +124,7 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -141,12 +134,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
+          node-version: '20'
           registry-url: "https://registry.npmjs.org"
-          # Remove cache option
-      
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Set Git user
         run: |
