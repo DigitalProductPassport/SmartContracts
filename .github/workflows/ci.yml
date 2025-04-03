@@ -76,6 +76,20 @@ jobs:
           find contracts -name "*.sol" -type f | sort
         continue-on-error: true
 
+      - name: Run Echidna
+        uses: crytic/echidna-action@v2
+        with:
+          solc-version: '0.8.20'
+          files: 'contracts/ProductPassportEchidnaTest.sol'
+          contract: 'ProductPassportEchidnaTest'
+          corpus-dir: 'corpus'
+          config: 'echidna.yaml'
+          test-mode: 'assertion'
+          format: 'json'
+          output-file: 'reports/echidna-output.json'
+          solc-args: '--allow-paths . --include-path node_modules'
+        continue-on-error: true
+        
       - name: Run Mythril Analysis on first contract
         run: |
           mkdir -p reports
@@ -88,21 +102,7 @@ jobs:
 
         continue-on-error: true
 
-      - name: Run Echidna
-        uses: crytic/echidna-action@v2
-        env:
-          SOLC_VERSION: 0.8.20
-        with:
-          solc-version: '0.8.20'
-          files: 'contracts/ProductPassportEchidnaTest.sol'
-          contract: 'ProductPassportEchidnaTest'
-          corpus-dir: 'corpus'
-          config: 'echidna.yaml'
-          test-mode: 'assertion'
-          format: 'json'
-          output-file: 'reports/echidna-output.json'
-          solc-args: '--allow-paths . --include-path node_modules'
-        continue-on-error: true
+
         
       - name: Create security summary
         run: |
