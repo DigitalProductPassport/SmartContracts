@@ -52,23 +52,16 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Mythril and Dependencies
+      - name: Install Slither
         run: |
-          pip install mythril
+          pip install slither-analyzer
           solc-select install 0.8.20
-          solc-select use 0.8.20
         continue-on-error: true
-
+      
       - name: Run Slither
-        uses: crytic/slither-action@v0.4.0
-        id: slither
-        with:
-          node-version: 20
-          fail-on: none
-          target: contracts
-          solc-version: 0.8.20
-          ignore-compile: true
-          solc-remaps: '@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/ @openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/'
+        run: |
+          mkdir -p reports
+          slither contracts --solc-remaps '@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/ @openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/' --json reports/slither-report.json
         env:
           SOLC_VERSION: 0.8.20
         continue-on-error: true
