@@ -12,8 +12,9 @@
     "prettier:check": "prettier --check \"**/*.{js,json,md,sol,ts,yml}\"",
     "prettier:write": "prettier --write \"**/*.{js,json,md,sol,ts,yml}\"",
     "security:slither": "slither contracts --solc-remaps '@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/ @openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/' --json slither-report.json",
-    "security:mythril": "mkdir -p reports && find contracts -name \"*.sol\" -exec myth analyze {} --solv 0.8.20 -o json --solc-args=\"--allow-paths . --include-path node_modules\" \\; > reports/mythril-report.json",
-    "security:all": "npm run security:slither && npm run security:mythril"
+    "security:mythril": "mkdir -p reports && find contracts -name \"*.sol\" -print0 | xargs -0 -I{} myth analyze {} --solv 0.8.20 -o json --solc-json remappings.json",
+    "security:mythril-single": "mkdir -p reports && myth analyze contracts/ProductPassport.sol --solv 0.8.20 -o json --solc-json remappings.json > reports/mythril-report.json",
+    "security:all": "npm run security:slither && npm run security:mythril-single"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.7",
