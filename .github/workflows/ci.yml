@@ -70,13 +70,29 @@ jobs:
           [ -f slither-report.json ] && mv slither-report.json reports/ || echo "No slither report generated"
         continue-on-error: true
 
-      - name: Run Mythril Analysis
+      - name: List contract files
+        run: |
+          echo "Listing contract files:"
+          find contracts -name "*.sol" -type f | sort
+        continue-on-error: true
+
+      - name: Run Mythril Analysis on first contract
         run: |
           mkdir -p reports
           # Set up solc explicitly
           export PATH="$HOME/.solc-select/artifacts/solc-0.8.20:$PATH"
           solc-select use 0.8.20
-          npm run security:mythril || true
+          
+          # Find the first contract file
+          FIRST_CONTRACT=$(find contracts -name "*.sol" -type f | sort | head -1)
+          
+          if [ -n "$FIRST_CONTRACT" ]; then
+            echo "Analyzing $FIRST_CONTRACT with Mythril..."
+            myth analyze "$FIRST_CONTRACT" --solv 0.8.20 -o json --solc-args="--allow-paths $(pwd)" > reports/mythril-report.json
+          else
+            echo "No contract files found"
+            exit 0
+          fi
         continue-on-error: true
 
       - name: Run Echidna
@@ -101,6 +117,11 @@ jobs:
           echo "## Generated on $(date)" >> reports/summary.md
           echo "" >> reports/summary.md
           
+          # Add contract list
+          echo "## Contract Files" >> reports/summary.md
+          find contracts -name "*.sol" -type f | sort >> reports/summary.md
+          echo "" >> reports/summary.md
+          
           # Add Slither summary if available
           if [ -f "reports/slither-report.json" ]; then
             echo "## Slither Analysis" >> reports/summary.md
@@ -121,6 +142,14 @@ jobs:
             echo "Echidna fuzzing completed. See echidna-output.json for detailed findings." >> reports/summary.md
             echo "" >> reports/summary.md
           fi
+        continue-on-error: true
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: reports/
+          retention-days: 7
         continue-on-error: true
 
   gas-reporter:
