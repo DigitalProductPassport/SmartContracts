@@ -123,14 +123,6 @@ jobs:
           fi
         continue-on-error: true
 
-      - name: Upload Security Reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: security-reports
-          path: reports/
-          retention-days: 7
-        continue-on-error: true
-
   gas-reporter:
     runs-on: ubuntu-latest
 
