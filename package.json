@@ -13,7 +13,7 @@
     "prettier:write": "prettier --write \"**/*.{js,json,md,sol,ts,yml}\"",
     "security:slither": "slither contracts --solc-remaps '@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/ @openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/' --json slither-report.json",
     "security:mythril": "mkdir -p reports && find contracts -name \"*.sol\" -print0 | xargs -0 -I{} myth analyze {} --solv 0.8.20 -o json --solc-json remappings.json",
-    "security:mythril-single": "myth analyze contracts/ProductPassport.sol --solv 0.8.20 -o json --solc-json solc-config.json --solc-args=\"--allow-paths . --base-path . --include-path node_modules/ --remap @openzeppelin/=node_modules/@openzeppelin/\" --execution-timeout 300",
+    "security:mythril-single": "myth analyze contracts/ProductPassport.sol --solv 0.8.20 -o json --solc-json solc-config.json --solc-args=\"--allow-paths . --base-path . --include-path node_modules\"",
     "security:all": "npm run security:slither && npm run security:mythril-single"
   },
   "devDependencies": {
