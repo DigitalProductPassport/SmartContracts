@@ -84,7 +84,7 @@ jobs:
           contract: 'ProductPassportEchidnaTest'
           corpus-dir: 'corpus'
           config: 'echidna.yaml'
-          test-mode: 'assertion'
+          test-mode: 'dapptest'
           format: 'json'
           output-file: 'reports/echidna-output.json'
           solc-args: '--allow-paths . --base-path . --include-path node_modules/'
