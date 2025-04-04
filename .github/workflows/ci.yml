@@ -87,8 +87,7 @@ jobs:
           test-mode: 'assertion'
           format: 'json'
           output-file: 'reports/echidna-output.json'
-          solc-args: '--allow-paths .'
-        continue-on-error: true
+          solc-args: '--allow-paths . --base-path . --include-path node_modules/'
 
       - name: Run Mythril Analysis on first contract
         run: |
@@ -99,7 +98,6 @@ jobs:
           # Find the first contract file
           echo "Analyzing $FIRST_CONTRACT with Mythril..."
           npm run security:mythril-single
-
         continue-on-error: true
 
 

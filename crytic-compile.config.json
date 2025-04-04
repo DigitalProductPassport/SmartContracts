@@ -1,0 +1,5 @@
+{
+    "solc_remaps": [
+      "@openzeppelin/=node_modules/@openzeppelin/"
+    ]
+  }
