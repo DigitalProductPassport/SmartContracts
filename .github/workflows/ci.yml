@@ -98,7 +98,7 @@ jobs:
           solc-select use 0.8.20
           # Find the first contract file
           echo "Analyzing $FIRST_CONTRACT with Mythril..."
-          npm run security:mythril-single
+          myth analyze contracts/ProductPassport.sol --solv 0.8.20 -o json --solc-json remappings.json --solc-args="--allow-paths . --base-path . --include-path node_modules" --execution-timeout 60
         continue-on-error: true
 
 
