@@ -82,7 +82,6 @@ jobs:
           solc-version: '0.8.20'
           files: 'contracts/ProductPassportEchidnaTest.sol'
           contract: 'ProductPassportEchidnaTest'
-          corpus-dir: 'corpus'
           config: 'echidna.yaml'
           test-mode: 'dapptest'
           format: 'json'
