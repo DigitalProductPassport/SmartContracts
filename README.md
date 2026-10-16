@@ -1,164 +1,196 @@
-I understand. Let's correct the Pinata integration section to reflect the proper usage of a JSON configuration file, including how to pin files listed in the JSON file.
+# Digital Product Passport — Smart Contracts
 
-Here's the updated README:
+Solidity smart contracts for **Digital Product Passports (DPP)** on EVM-compatible blockchains, built with Hardhat 3 and OpenZeppelin Contracts 5. The goal of the project is to create a public reference implementation and, eventually, an EIP for on-chain product passports.
 
----
-
-# Digital Product Passport SDK
-
-## Introduction
-
-Welcome to the Digital Product Passport SDK repository! This project provides a JavaScript/TypeScript SDK for interacting with Digital Product Passport (DPP) smart contracts deployed on the Ethereum blockchain.
+Published on npm as [`@digitalproductpassport/smartcontracts`](https://www.npmjs.com/package/@digitalproductpassport/smartcontracts).
 
 ## What is a Digital Product Passport?
 
-A Digital Product Passport (DPP) is a comprehensive digital record that tracks a product's journey from design to disposal. It consolidates data related to material sourcing, manufacturing, and lifecycle events, providing valuable information to manufacturers, consumers, and repair services.
+A Digital Product Passport is a digital record that follows a product from design to disposal. It collects data about material sourcing, manufacturing, certifications and lifecycle events, and makes that data available to manufacturers, consumers, recyclers and repair services. A physical product links to its passport through an NFC chip, QR code or RFID tag.
 
-Instead of a physical document, the DPP is represented digitally and can be accessed through various means such as NFC chips, QR codes, or RFID tags. The DPP provides transparency and traceability throughout the product's lifecycle.
+Storing the passport on a blockchain makes the record tamper-evident and traceable. Large documents such as manuals and specifications are stored off-chain (for example on IPFS) and referenced by their content hash.
 
-## SDK Overview
+## Architecture
 
-The Digital Product Passport SDK facilitates interactions with the DPP smart contracts. It provides methods for deploying contracts, setting and retrieving product details, and integrating with Pinata for storing and retrieving product-related files.
+The system has four contracts. Each one is `Ownable`, so only the owner can write data.
 
-### Features
+```mermaid
+graph TD
+    IPB[IntegratedProductPassportBatch<br/>ERC-721 batch NFTs] --> PP[ProductPassport]
+    IPB --> CM[ComplexManagement]
+    IPB --> GEO[Geolocation]
+    PP --> CM
+    CM --> GEO
+```
 
-- **Batch Management**: Deploy and interact with Batch contracts for managing product batches.
-- **Product Passport Management**: Deploy and interact with Product Passport contracts for managing product details.
-- **Pinata Integration**: Upload and manage product-related files on IPFS via Pinata.
+| Contract | File | Purpose |
+| --- | --- | --- |
+| `Geolocation` | [contracts/Geolocation.sol](contracts/Geolocation.sol) | Stores locations (latitude, longitude, extra info) under a string ID. |
+| `ComplexManagement` | [contracts/ComplexManagement.sol](contracts/ComplexManagement.sol) | Registers production sites ("complexes"): name, country, address, site type, industry, and a link to a geolocation. |
+| `ProductPassport` | [contracts/ProductPassport.sol](contracts/ProductPassport.sol) | Stores product data: description, manuals and specifications (IPFS hashes), batch number, production and expiry dates, certifications, warranty, material composition (addresses of material passports), and the complex where the product was made. |
+| `IntegratedProductPassportBatch` | [contracts/ExtendedProductPassport.sol](contracts/ExtendedProductPassport.sol) | Mints an ERC-721 token (`DPP`) for each production batch. Tracks amount, assembly time, transport details, and the batch's origin and current location. |
+| `ProductPassportEchidnaTest` | [contracts/ProductPassportEchidnaTest.sol](contracts/ProductPassportEchidnaTest.sol) | Echidna fuzzing harness that checks product/complex/geolocation invariants. Test-only. |
 
-### Key Components
+### Data flow
 
-- **Batch**: Interact with Batch smart contracts, deploy new instances, and manage batch details.
-- **ProductPassport**: Interact with Product Passport smart contracts to set and retrieve product details.
-- **Pinata Utility**: Upload JSON data and files to IPFS via Pinata.
+1. **Geolocation**: a location is created with `setGeolocation(id, lat, lon, info)`.
+2. **Complex**: `ComplexManagement.addComplex(...)` registers a site and stores its geolocation.
+3. **Product**: `ProductPassport.createProduct(...)` creates a passport. The product must reference an existing complex.
+4. **Batch**: `IntegratedProductPassportBatch.createBatch(...)` mints a batch NFT for an existing product. The batch's origin is taken from the product's complex.
+5. **Tracking**: `updateBatchLocation(...)` moves the batch. `getBatchDetails(batchId, productId)` returns the batch, product, complex, and current and origin locations in one call. `setTokenURI` links the NFT to off-chain metadata (for example an IPFS JSON file).
 
-## Installation
+### Wiring the contracts together
 
-To install the SDK, use npm:
+Each constructor takes an `initialOwner` address. After deployment, the contracts are linked like this (the Ignition module does it for you):
+
+```solidity
+complexManagement.setGeolocationContract(address(geolocation));
+productPassport.setComplexManagement(address(complexManagement));
+batchContract.initializeContracts(address(productPassport), address(complexManagement), address(geolocation));
+geolocation.transferOwnership(address(complexManagement));
+```
+
+> **Ownership note:** `Geolocation.setGeolocation` is `onlyOwner`, and `ComplexManagement.addComplex` calls it, so `ComplexManagement` must own `Geolocation`. See [Project status](#project-status).
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 22.10 or later
+- npm
+
+### Install, build and test
 
 ```bash
-npm install @digitalproductpassport/sdk
+git clone https://github.com/DigitalProductPassport/SmartContracts.git
+cd SmartContracts
+npm install
+npx hardhat build
+npx hardhat test
 ```
 
-## Usage
+The toolchain:
 
-### Initial Setup
+| Tool | Version |
+| --- | --- |
+| Solidity compiler | 0.8.37 (contracts use `pragma solidity ^0.8.24`) |
+| Hardhat | 3.x, with `@nomicfoundation/hardhat-toolbox-mocha-ethers` |
+| OpenZeppelin Contracts | 5.6.x |
+| ethers | 6.x |
+| TypeScript tests | Mocha 12 + Chai 6 |
 
-Before using the SDK, configure your environment by setting up your Ethereum provider and private key.
+The project is an ES module (`"type": "module"`), as Hardhat 3 requires.
 
-### Example: Using the Batch Component
-
-```typescript
-import { ethers } from 'ethers';
-import { Batch } from '@digitalproductpassport/sdk';
-
-const provider = new ethers.JsonRpcProvider('YOUR_PROVIDER_URL');
-const privateKey = 'YOUR_PRIVATE_KEY';
-const gweiBid = 20;
-
-const batch = new Batch(provider, privateKey, gweiBid);
-
-(async () => {
-  const contractAddress = await batch.deployBatch();
-  console.log(`Batch contract deployed at: ${contractAddress}`);
-
-  await batch.setBatch('batchId', {
-    productIds: ['product1', 'product2'],
-    productionDate: '2023-01-01',
-    expiryDate: '2024-01-01',
-    location: 'Factory Location'
-  });
-
-  const batchDetails = await batch.getBatch('batchId');
-  console.log(`Batch details: ${JSON.stringify(batchDetails)}`);
-})();
-```
-
-### Example: Using the ProductPassport Component
-
-```typescript
-import { ethers } from 'ethers';
-import { ProductPassport } from '@digitalproductpassport/sdk';
-
-const provider = new ethers.JsonRpcProvider('YOUR_PROVIDER_URL');
-const privateKey = 'YOUR_PRIVATE_KEY';
-const gweiBid = 20;
-
-const productPassport = new ProductPassport(provider, privateKey, gweiBid);
-
-(async () => {
-  const passportAddress = await productPassport.deploy();
-  console.log(`Product Passport contract deployed at: ${passportAddress}`);
-
-  await productPassport.setProductPassport({
-    productId: 'product123',
-    description: 'Product Description',
-    manuals: ['manual1.pdf', 'manual2.pdf'],
-    specifications: ['spec1.pdf', 'spec2.pdf'],
-    batchNumber: 'batch001',
-    productionDate: '2023-01-01',
-    expiryDate: '2024-01-01',
-    certifications: 'Certifications Info',
-    warrantyInfo: 'Warranty Info',
-    materialComposition: 'Material Composition',
-    complianceInfo: 'Compliance Info',
-    ipfs: 'QmTestHash'
-  });
-
-  const productDetails = await productPassport.getProductPassport('product123');
-  console.log(`Product Passport details: ${JSON.stringify(productDetails)}`);
-})();
-```
-
-### Example: Pinata Integration with JSON Configuration
-
-Create a JSON configuration file, `config.json`, with the following structure:
-
-```json
-{
-  "manuals": ["path/to/manual1.pdf", "path/to/manual2.pdf"],
-  "specifications": ["path/to/spec1.pdf", "path/to/spec2.pdf"],
-  "otherField": "someValue"
-}
-```
-
-Use the Pinata utility to upload the files listed in the configuration file and get back the IPFS CIDs:
-
-```typescript
-import { uploadFilesFromConfig } from '@digitalproductpassport/sdk';
-
-const configPath = 'path/to/config.json';
-
-(async () => {
-  try {
-    const pinnedData = await uploadFilesFromConfig(configPath);
-    console.log('Pinned data:', pinnedData);
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-  }
-})();
-```
-
-## Running Tests
-
-To run the tests for the SDK, use:
+### Using the package in another project
 
 ```bash
-npm test
+npm install @digitalproductpassport/smartcontracts
 ```
+
+```solidity
+import "@digitalproductpassport/smartcontracts/contracts/ProductPassport.sol";
+```
+
+TypeChain bindings for ethers v6 are generated into [types/](types/) on every build:
+
+```typescript
+import { ProductPassport__factory } from "@digitalproductpassport/smartcontracts/types";
+```
+
+## Deployment
+
+Contracts are deployed with [Hardhat Ignition](https://hardhat.org/ignition). The module in [ignition/modules/DigitalProductPassport.ts](ignition/modules/DigitalProductPassport.ts) deploys all four contracts, links them together, and transfers ownership of `Geolocation` to `ComplexManagement`.
+
+```bash
+# In-memory local network
+npm run deploy:local
+
+# Sepolia (also verifies the contracts on Etherscan)
+npm run deploy:sepolia
+
+# Any other configured network
+npx hardhat ignition deploy ignition/modules/DigitalProductPassport.ts --network baseSepolia
+```
+
+### Configuration variables
+
+Network secrets are read through Hardhat configuration variables. They are loaded only when a network that needs them is used, so tests run without any of them. Set them as environment variables, or store them encrypted in the Hardhat keystore:
+
+```bash
+npx hardhat keystore set DEPLOYER_PRIVATE_KEY
+npx hardhat keystore set SEPOLIA_RPC_URL
+```
+
+| Variable | Used by |
+| --- | --- |
+| `DEPLOYER_PRIVATE_KEY` | All public networks |
+| `SEPOLIA_RPC_URL` | `sepolia` |
+| `BASE_SEPOLIA_RPC_URL` | `baseSepolia` |
+| `AVALANCHE_FUJI_RPC_URL` | `avalancheFuji` |
+| `ARBITRUM_SEPOLIA_RPC_URL` | `arbitrumSepolia` |
+| `ETHERSCAN_API_KEY` | Contract verification |
+
+### Networks
+
+| Name | Network | Chain ID |
+| --- | --- | --- |
+| `default` | Local in-process simulated network | 31337 |
+| `hardhatMainnet` | Local simulated L1 | 31337 |
+| `sepolia` | Ethereum Sepolia | 11155111 |
+| `baseSepolia` | Base Sepolia | 84532 |
+| `avalancheFuji` | Avalanche Fuji | 43113 |
+| `arbitrumSepolia` | Arbitrum Sepolia | 421614 |
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run build` | Compile contracts and generate TypeChain types |
+| `npm test` | Run the Mocha test suite |
+| `npm run coverage` | Run tests with Hardhat's built-in coverage report |
+| `npm run gas` | Run tests with per-function gas statistics |
+| `npm run deploy:local` | Deploy the system to the local network with Ignition |
+| `npm run deploy:sepolia` | Deploy to Sepolia and verify on Etherscan |
+| `npm run prettier:check` / `prettier:write` | Check or apply formatting |
+| `npm run security:slither` | Static analysis with Slither (writes `slither-report.json`) |
+| `npm run security:mythril-single` | Symbolic analysis of `ProductPassport.sol` with Mythril |
+| `npm run security:all` | Run Slither and Mythril |
+
+Slither and Mythril are Python tools and must be installed separately (`pip install slither-analyzer mythril solc-select`).
+
+### Fuzzing with Echidna
+
+```bash
+echidna contracts/ProductPassportEchidnaTest.sol --contract ProductPassportEchidnaTest --config echidna.yaml
+```
+
+The harness checks that every product references an existing complex and that its origin geolocation can be resolved.
+
+## Continuous integration
+
+[.github/workflows/ci.yml](.github/workflows/ci.yml) runs on pushes and pull requests to `main`:
+
+- **build**: production build, solhint, tests with coverage, Slither, Echidna and Mythril. Reports are uploaded as the `security-reports` artifact.
+- **gas-reporter**: runs the tests with gas statistics.
+- **publish** (pushes to `main` only): sets the patch version to the run number, creates a GitHub release, and publishes the package to npm.
+
+## Project status
+
+The project is a work in progress. Known limitations:
+
+- `Geolocation` can only have one owner. The deployment gives it to `ComplexManagement`, so `IntegratedProductPassportBatch.updateBatchLocation` can move a batch only to a geolocation that already exists. Creating a new location from that function reverts.
+- `Geolocation` validates coordinates only by string length, not by numeric range.
+- The docs in [docs/](docs/) were generated for an older version of the contracts and are not regenerated automatically.
 
 ## Contributing
 
-We welcome contributions! To contribute:
+Contributions are welcome:
 
 1. Fork the repository.
-2. Make your changes in a new branch.
-3. Submit a pull request with a description of your changes.
+2. Create a feature branch.
+3. Make your changes and run `npm test`.
+4. Open a pull request that describes the change.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-Feel free to adjust the code examples, file paths, and other details to better fit your project structure and requirements.
+MIT. See [LICENSE](LICENSE).
