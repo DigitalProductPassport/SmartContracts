@@ -146,3 +146,6 @@ artifacts
 
 # vscode files
 .vscode
+
+# Hardhat 3 local Ignition deployments
+ignition/deployments/chain-31337

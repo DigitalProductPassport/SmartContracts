@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.24;
 
 import "./ProductPassport.sol";
 import "./ComplexManagement.sol";
@@ -10,16 +10,15 @@ contract ProductPassportEchidnaTest {
     ComplexManagement complexManagement;
     Geolocation geolocation;
     
-    address owner = msg.sender;
     uint256 testProductId = 1;
     string testComplexId = "test-complex";
     string testGeoId = "test-geo";
     
     constructor() {
-        // Deploy contracts
-        geolocation = new Geolocation(owner);
-        complexManagement = new ComplexManagement(owner);
-        productPassport = new ProductPassport(owner);
+        // Deploy contracts owned by this harness so it can call onlyOwner functions
+        geolocation = new Geolocation(address(this));
+        complexManagement = new ComplexManagement(address(this));
+        productPassport = new ProductPassport(address(this));
         
         // Set up contract relationships
         complexManagement.setGeolocationContract(address(geolocation));
@@ -27,6 +26,9 @@ contract ProductPassportEchidnaTest {
         
         // Initialize test data
         geolocation.setGeolocation(testGeoId, "40.7128", "-74.0060", "Test location");
+
+        // ComplexManagement writes geolocations on addComplex, so it must own Geolocation
+        geolocation.transferOwnership(address(complexManagement));
         
         // Add test complex
         complexManagement.addComplex(
@@ -88,8 +90,7 @@ contract ProductPassportEchidnaTest {
             return true; // Skip if product doesn't exist yet
         }
         
-        (ProductPassport.ProductData memory product, Geolocation.GeoLocation memory geo) = 
-            productPassport.getProductDetails(testProductId);
+        (, Geolocation.GeoLocation memory geo) = productPassport.getProductDetails(testProductId);
             
         // Verify that geolocation has valid data
         return bytes(geo.latitude).length > 0 && bytes(geo.longitude).length > 0;
